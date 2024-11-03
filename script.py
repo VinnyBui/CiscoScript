@@ -1,5 +1,6 @@
 import serial
 import time
+import os
 
 # Configuration for serial connection
 serial_port = 'COM5'  # Replace with your COM port
@@ -57,22 +58,51 @@ def get_snmp_chassis_serial():
     ser.reset_input_buffer()  # Clear any previous data in the input buffer
     ser.write(b"\n show snmp chassis\n")
     time.sleep(2)  
-    # Capture the response until we see the "Router#" prompt
-    found, output = wait_for_prompt("Router#", timeout=10)
+    found, output = wait_for_prompt("Router#", timeout=10)  # Wait for the Router prompt
+
     if found:
-        print(b" output\n")
-        # Split the output by lines and search for the serial number format
+        # Search for the serial number in the output
         lines = output.splitlines()
         for line in lines:
-            # Check if line is not empty, does not contain control characters, and likely matches a serial number format
             serialNum = line.strip()
-            if serialNum and serialNum.isalnum() and len(serialNum) > 5:  # Assuming serial numbers are alphanumeric and of reasonable length
+            if serialNum and serialNum.isalnum() and len(serialNum) > 5:  # Check for alphanumeric and reasonable length
                 print(f"SNMP Chassis Serial Number: {serialNum}")
                 return serialNum
 
     print("Failed to retrieve SNMP chassis information.")
     return None
 
+def create_log_file(serial_number):
+    """Create a log file named after the serial number on the desktop in a CiscoLogs folder."""
+    desktop_path = os.path.join(os.path.expanduser("~"), "Desktop", "CiscoLogs")
+    if not os.path.exists(desktop_path):
+        os.makedirs(desktop_path)  # Create the directory if it doesn't exist
+    log_file_path = os.path.join(desktop_path, f"{serial_number}.txt")
+    return open(log_file_path, "w")
+
+
+def capture_cisco_commands(log_file):
+    """Execute Cisco commands and write output to the log file."""
+    commands = [
+        "term length 0",
+        "!",
+        "show inventory",
+        "show hardware",
+        "show env all",
+        "show license feature",
+        "show license status"
+    ]
+
+    for cmd in commands:
+        log_file.write(f"\n{cmd}\n")
+        ser.write((cmd + "\r").encode())
+        time.sleep(2)
+        
+        output = ""
+        while ser.in_waiting > 0:
+            output += ser.read(ser.in_waiting).decode(errors="ignore")
+        log_file.write(output + "\n")
+        print(output)  # Display in console as well
 
 try:
     # Step 1: Enter ROMMON mode by sending a break signal
@@ -118,6 +148,11 @@ try:
                                         serial_number = get_snmp_chassis_serial()
                                         if serial_number:
                                             print(f"Stored Serial Number: {serial_number}")
+                                            # Capture output in a log file
+                                            with create_log_file(serial_number) as log_file:
+                                                capture_cisco_commands(log_file)
+                                            write_and_wait(b"\nreload\n", "System configuration has been modified. Save? [yes/no]:")[0]
+                                            ser.write(b"no\n")
 
 except Exception as e:
     print(f"An error occurred: {e}")
