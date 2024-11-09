@@ -148,7 +148,6 @@ def main():
                 with create_log_file(serial_number) as log_file:
                     capture_cisco_commands(log_file)
                 
-                find_log_and_print_file(serial_number)
                 reload_router() 
     except Exception as e:
         print(f"An error occurred: {e}")
