@@ -38,7 +38,6 @@ def wait_for_prompt(prompt, timeout=90):
             print(data, end="")
 
             if prompt in output:
-                print(f"\nFound prompt: {prompt}")
                 return True, output
 
         if time.time() - start_time > timeout:
@@ -56,30 +55,50 @@ def write_and_wait(command, expected_prompt, timeout=90):
 def delete_configuration_password():
     ser.write(b"set SWITCH_NUMBER 1\n")
     ser.write(b"set BOOT\n")
-    ser.write(b"set SWITCH_PRIORITY 15\n\n")
+    ser.write(b"set SWITCH_PRIORITY 15\n")
+
     ser.write(b"flash\n")
     ser.flush()
-    time.sleep(1)
-    if write_and_wait(b"\n", "switch:")[0]:
-        ser.write(b"delete flash:config.text\n")
-        write_and_wait(b"", "Are you sure you want to delete flash:config.text (y/n)?")
-        time.sleep(1)
-        ser.write(b"y\n")
-        time.sleep(1)
-        ser.write(b"delete flash:vlan.dat\n")
-        write_and_wait(b"", "Are you sure you want to delete flash:vlan.dat (y/n)?")
-        time.sleep(1)
-        ser.write(b"y\n")
-        ser.write(b"reset\n")
-        ser.write(b"y\n")
-        
+
+    time.sleep(10)
+    write_and_wait(b"", "switch:")
+    
+    # Delete config.text
+    ser.write(b"delete flash:config.text\n")
+    found = wait_for_prompt('Are you sure you want to delete "flash:config.text" (y/n)?', timeout=10)[0]
+    if found:
+        ser.write(b"y\n")  # Send 'y' to confirm deletion
+        time.sleep(1)  # Allow time for the deletion to complete
+        print("Confirmed deletion of flash:config.text")
+    else:
+        print("Failed to find confirmation prompt for config.text deletion or file does not exist.")
+    
+    # Delete vlan.dat
+    ser.write(b"delete flash:vlan.dat\n")
+    found = wait_for_prompt('Are you sure you want to delete "flash:vlan.dat" (y/n)?', timeout=10)[0]
+    if found:
+        ser.write(b"y\n")  # Send 'y' to confirm deletion
+        time.sleep(1)  # Allow time for the deletion to complete
+        print("Confirmed deletion of flash:vlan.dat")
+    else:
+        print("Failed to find confirmation prompt for vlan.dat deletion or file does not exist.")
+    
+    # Reset the device
+    ser.write(b"reset\n")
+    found = wait_for_prompt("Are you sure you want to reset the system (y/n)?")[0]
+    if found:
+        ser.write(b"y\n")  # Confirm reset
+        time.sleep(1)  # Allow time for the deletion to complete
+        print("Resetting the device.")
+    else:
+        print("Failed to find reload confirmation prompt.")
+
+    time.sleep(3)  # Allow time for the reset process to initiate
+
+
 def configure_router():
-    time.sleep(3)
-    write_and_wait(b"\n", "would you like to enter the initial configuration dialog? [yes/no]: ")
-    ser.write(b"no\n")
     write_and_wait(b"\nno\n", "Switch>")
     if write_and_wait(b"enable\n", "Switch#")[0]:
-        write_and_wait(b"\nterm length 0\n", "Switch#")
         configure_terminal()
 
 def configure_terminal():
@@ -91,9 +110,12 @@ def configure_terminal():
 def main():
     """Main function to execute all steps."""
     try:
-        send_break_signal()
-        if write_and_wait(b'', "switch:")[0]:
+        if write_and_wait(b'', "switch:", timeout=250)[0]:
             delete_configuration_password()
+            if write_and_wait(b'\n', "Would you like to enter the initial configuration dialog? [yes/no]:", timeout=250)[0]:
+                ser.write(b"\n")
+                configure_router()
+        
 
     except Exception as e:
         print(f"An error occurred: {e}")
