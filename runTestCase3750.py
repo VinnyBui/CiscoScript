@@ -145,16 +145,31 @@ def configure_terminal():
     ser.write(b"snmp-server community public RO\n")
     ser.write(bytes([26]))
 
+def get_snmp_chassis_serial():
+    """Retrieve the SNMP chassis serial number."""
+    ser.reset_input_buffer()
+    ser.write(b"\n show snmp chassis\n")
+    time.sleep(2)
+    found, output = wait_for_prompt("Router#", timeout=10)
+
+    if found:
+        lines = output.splitlines()
+        for line in lines:
+            serial_num = line.strip()
+            if serial_num and serial_num.isalnum() and len(serial_num) > 5:
+                print(f"SNMP Chassis Serial Number: {serial_num}")
+                return serial_num
+
+    print("Failed to retrieve SNMP chassis information.")
+    return None
+
 
 def main():
     """Main function to execute all steps."""
     try:
         if write_and_wait(b'', "switch:", timeout=250)[0]:
             delete_configuration_password()
-
-
-        
-
+            serial_number = get_snmp_chassis_serial()
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:
