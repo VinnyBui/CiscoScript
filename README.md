@@ -43,6 +43,12 @@ This script connects to a Cisco device, retrieves specific information (like the
         Enter the serial number to print log: [Your Serial Number]
         ```
 
+- **runC3750.py**: Run this script to connect to a Cisco 3750 Switch, retrieve data, and save the output to a log file:
+    ```bash
+    python runC3750.py
+    ```
+    - Make sure to hold down the button to switch mode
+    
 ### 5. Log File Location
 
 - Log files are saved to your Desktop in the following directory:
