@@ -137,12 +137,14 @@ def configure_terminal():
     ser.write(b"config terminal\n")
 
     found = wait_for_prompt("Switch(config)#")
-    if found:
-        ser,write(b"no logging console\n")
-        ser.write(b"snmp-server community public RO\n")
-        ser.write(bytes([26]))
-    else:
+    if not found:
         print("##Failed to switch to config terminal")
+        return
+
+    ser.write(b"no logging console\n")
+    ser.write(b"snmp-server community public RO\n")
+    ser.write(bytes([26]))
+
 
 def main():
     """Main function to execute all steps."""
