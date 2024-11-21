@@ -134,11 +134,13 @@ def configure_router():
 def configure_terminal():
     ser.write(b"config terminal\n")
 
+    # Wait for Switch(config)
     found = wait_for_prompt("Switch(config)#")
     if not found:
         print("##Failed to switch to config terminal")
         return
 
+    # Send command
     ser.write(b"no logging console\n")
     ser.write(b"snmp-server community public RO\n")
     ser.write(bytes([26]))
@@ -191,6 +193,8 @@ def capture_cisco_commands(log_file):
         "show inventory",
         "show env all"
     ]
+    
+    # Run all the commands in the list
     for cmd in commands:
         log_file.write(f"\n{cmd}\n")
         ser.write((cmd + "\r").encode())
@@ -247,6 +251,7 @@ def main():
                     capture_cisco_commands(log_file)
 
                 close_restart_switch()
+        print("Script is done")
 
     except Exception as e:
         print(f"An error occurred: {e}")
