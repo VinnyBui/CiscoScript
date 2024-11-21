@@ -17,37 +17,32 @@ ser = serial.Serial(
     stopbits=serial.STOPBITS_ONE,
 )
 
-def send_break_signal():
-    """Send a break signal to enter ROMMON mode."""
-    time.sleep(5)
-    for _ in range(3):
-        ser.send_break()
-        time.sleep(1)
-    ser.write(b'\n')
-
 def wait_for_prompt(prompt, timeout=90):
     """Wait for a specific prompt to appear within the timeout."""
     start_time = time.time()
     output = ""
-    current_timeout = 1
-
     while True:
+        # Read incoming data
         if ser.in_waiting > 0:
             data = ser.read(ser.in_waiting).decode(errors="ignore")
             output += data
-            print(data, end="")
+            print(data, end="")  # Log incoming data for debugging
 
+            # Check if the prompt exists in the accumulated output
             if prompt in output:
+                print(f"\n## Prompt found: {prompt}")
                 return True, output
 
+        # Timeout check
         if time.time() - start_time > timeout:
             print(f"\nTimeout reached while waiting for: {prompt}")
+            print(f"Final received data:\n{output}")  # Log all data received before timeout
             return False, output
 
-        time.sleep(current_timeout)
-        current_timeout = min(current_timeout + 1, 5)
+        time.sleep(0.5)  # Avoid busy-waiting
 
-def write_and_wait(command, expected_prompt, timeout=90):
+
+def write_and_wait(command, expected_prompt, timeout=60):
     """Send a command and wait for the expected prompt."""
     ser.write(command)
     return wait_for_prompt(expected_prompt, timeout)
@@ -69,9 +64,9 @@ def delete_configuration_password():
     if found:
         ser.write(b"y\n")  # Send 'y' to confirm deletion
         time.sleep(1)  # Allow time for the deletion to complete
-        print("Confirmed deletion of flash:config.text")
+        print("\n##Confirmed deletion of flash:config.text")
     else:
-        print("Failed to find confirmation prompt for config.text deletion or file does not exist.")
+        print("\n##Failed to find confirmation prompt for config.text deletion or file does not exist.")
     
     # Delete vlan.dat
     ser.write(b"delete flash:vlan.dat\n")
@@ -79,9 +74,9 @@ def delete_configuration_password():
     if found:
         ser.write(b"y\n")  # Send 'y' to confirm deletion
         time.sleep(1)  # Allow time for the deletion to complete
-        print("Confirmed deletion of flash:vlan.dat")
+        print("\n##Confirmed deletion of flash:vlan.dat")
     else:
-        print("Failed to find confirmation prompt for vlan.dat deletion or file does not exist.")
+        print("\n##Failed to find confirmation prompt for vlan.dat deletion or file does not exist.")
     
     # Reset the device
     ser.write(b"reset\n")
@@ -89,32 +84,73 @@ def delete_configuration_password():
     if found:
         ser.write(b"y\n")  # Confirm reset
         time.sleep(1)  # Allow time for the deletion to complete
-        print("Resetting the device.")
+        print("\n##Resetting the device.")
     else:
-        print("Failed to find reload confirmation prompt.")
+        print("\n##Failed to find reload confirmation prompt.")
 
-    time.sleep(3)  # Allow time for the reset process to initiate
-
+    # Wait for "Press RETURN to get started!"
+    ser.reset_input_buffer()  # Clear buffer before waiting
+    found, output = wait_for_prompt('Press RETURN to get started!', timeout=240)
+    if found:
+        print("\n##Detected 'Press RETURN to get started!'. Sending Enter key.")
+        ser.reset_input_buffer()  # Clear the input buffer before sending Enter
+        ser.write(b"\r")  # Try carriage return
+        ser.flush()
+        # Or send both
+        ser.write(b"\r\n")
+        ser.flush()
+        configure_router()
+    else:
+        print("\nFAILED to detect 'Press RETURN to get started!'. Output was:\n", output)
 
 def configure_router():
-    write_and_wait(b"\nno\n", "Switch>")
-    if write_and_wait(b"enable\n", "Switch#")[0]:
-        configure_terminal()
+
+    # Wait for configuration dialog prompt
+    found, output = wait_for_prompt("Would you like to enter the initial configuration dialog? [yes/no]:")
+    if not found:
+        print("\nFailed to detect initial configuration dialog. Output was:\n", output)
+        return
+
+    # Answer "no" to skip the dialog
+    ser.write(b"no\n")
+    ser.flush()
+
+    # Wait for Switch> prompt
+    found, output = wait_for_prompt("Switch>")
+    if not found:
+        print("\nFailed to detect 'Switch>' prompt. Output was:\n", output)
+        return
+
+    # Enter enable mode
+    ser.write(b"enable\n")
+    ser.flush()
+    found, output = wait_for_prompt("Switch#")
+    if not found:
+        print("\nFailed to detect 'Switch#' prompt. Output was:\n", output)
+        return
+
+    # Proceed to configuration terminal
+    configure_terminal()
+
 
 def configure_terminal():
-    write_and_wait(b"config terminal\n", "Switch(config)#")
-    write_and_wait(b"no logging console\n", "Switch(config)#")
-    write_and_wait(b"snmp-server community public RO\n", "Switch(config)#")
-    write_and_wait(bytes([26]), "#")
+    ser.write(b"config terminal\n")
+
+    found = wait_for_prompt("Switch(config)#")
+    if found:
+        ser,write(b"no logging console\n")
+        ser.write(b"snmp-server community public RO\n")
+        ser.write(bytes([26]))
+    else:
+        print("##Failed to switch to config terminal")
 
 def main():
     """Main function to execute all steps."""
     try:
         if write_and_wait(b'', "switch:", timeout=250)[0]:
             delete_configuration_password()
-            if write_and_wait(b'\n', "Would you like to enter the initial configuration dialog? [yes/no]:", timeout=250)[0]:
-                ser.write(b"\n")
-                configure_router()
+
+
         
 
     except Exception as e:
