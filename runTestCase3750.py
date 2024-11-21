@@ -41,7 +41,6 @@ def wait_for_prompt(prompt, timeout=90):
 
         time.sleep(0.5)  # Avoid busy-waiting
 
-
 def write_and_wait(command, expected_prompt, timeout=60):
     """Send a command and wait for the expected prompt."""
     ser.write(command)
@@ -90,7 +89,7 @@ def delete_configuration_password():
 
     # Wait for "Press RETURN to get started!"
     ser.reset_input_buffer()  # Clear buffer before waiting
-    found, output = wait_for_prompt('Press RETURN to get started!', timeout=240)
+    found, output = wait_for_prompt('Press RETURN to get started!', timeout=220)
     if found:
         print("\n##Detected 'Press RETURN to get started!'. Sending Enter key.")
         ser.reset_input_buffer()  # Clear the input buffer before sending Enter
@@ -132,7 +131,6 @@ def configure_router():
     # Proceed to configuration terminal
     configure_terminal()
 
-
 def configure_terminal():
     ser.write(b"config terminal\n")
 
@@ -147,12 +145,19 @@ def configure_terminal():
 
 def get_snmp_chassis_serial():
     """Retrieve the SNMP chassis serial number."""
-    ser.reset_input_buffer()
-    ser.write(b"\n show snmp chassis\n")
-    time.sleep(2)
-    found, output = wait_for_prompt("Router#", timeout=10)
-
+    ser.reset_input_buffer()  # Clear input buffer to avoid stale data
+    
+    # Send the command
+    ser.write(b"show snmp chassis\n")
+    ser.flush()
+    time.sleep(2)  # Wait for the output to be generated
+    
+    # Wait for the completion of the command output
+    found, output = wait_for_prompt("Switch#", timeout=10)  # Match "Switch#" as the prompt
     if found:
+        print("\nCommand executed successfully. Parsing output...")
+        
+        # Split lines and find the serial number
         lines = output.splitlines()
         for line in lines:
             serial_num = line.strip()
@@ -160,9 +165,76 @@ def get_snmp_chassis_serial():
                 print(f"SNMP Chassis Serial Number: {serial_num}")
                 return serial_num
 
-    print("Failed to retrieve SNMP chassis information.")
+        print("No valid serial number found in the output.")
+    else:
+        print("Failed to retrieve SNMP chassis information. Output was:\n", output)
+    
     return None
 
+def create_log_file(serial_number):
+    """Create a log file named after the serial number on the Desktop."""
+    if not os.path.exists(LOG_DIR):
+        os.makedirs(LOG_DIR)
+    return open(os.path.join(LOG_DIR, f"{serial_number}.txt"), "w")
+
+def capture_cisco_commands(log_file):
+    """Capture output from a list of Cisco commands and log them."""
+    commands = [
+        "term length 0",
+        "!",
+        "show inventory",
+        "show version",
+        "show env all",
+        "show diagnostic result switch 1",
+        "show license all switch 1", 
+        "show processes",
+        "show inventory",
+        "show env all"
+    ]
+    for cmd in commands:
+        log_file.write(f"\n{cmd}\n")
+        ser.write((cmd + "\r").encode())
+        time.sleep(2)
+        
+        output = ""
+        while ser.in_waiting > 0:
+            output += ser.read(ser.in_waiting).decode(errors="ignore")
+        log_file.write(output + "\n")
+        print(output)
+
+def close_restart_switch():
+    ser.write(b"!\n")
+    time.sleep(0.5)
+    ser.write(b"\n")
+
+    found = wait_for_prompt("#")[0]
+    if not found:
+        print("##Can't erase")
+        return 
+    
+    ser.write(b"write erase\n")
+
+    found = wait_for_prompt("Erasing the nvram filesystem will remove all configuration files! Continue? [confirm]")[0]
+    if not found:
+        print("##Failed to erase")
+        return 
+    
+    ser.write(b"\n")
+    ser.write(b"reload\n")
+
+    found = wait_for_prompt("System configuration has been modified. Save? [yes/no]: ")[0]
+    if not found:
+        print("##Failed to reload")
+        return
+    
+    ser.write(b"no\n")
+
+    found = wait_for_prompt("Proceed with reload? [confirm]")[0]
+    if not found:
+        print("##Failed to proceed with reload")
+        return
+    
+    ser.write(b"\n")
 
 def main():
     """Main function to execute all steps."""
@@ -170,6 +242,12 @@ def main():
         if write_and_wait(b'', "switch:", timeout=250)[0]:
             delete_configuration_password()
             serial_number = get_snmp_chassis_serial()
+            if serial_number:
+                with create_log_file(serial_number) as log_file:
+                    capture_cisco_commands(log_file)
+
+                close_restart_switch()
+
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:
