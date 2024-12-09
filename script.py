@@ -4,7 +4,7 @@ import os
 from printTest import find_log_and_print_file
 
 # Configuration for serial connection
-SERIAL_PORT = 'COM5'  # Replace with your COM port
+SERIAL_PORT = 'COM1'  # Replace with your COM port
 BAUD_RATE = 9600       # Standard baud rate for Cisco devices
 LOG_DIR = os.path.join(os.path.expanduser("~"), "Desktop", "CiscoLogs")  # Log directory on Desktop
 
