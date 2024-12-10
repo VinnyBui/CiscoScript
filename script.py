@@ -1,7 +1,6 @@
 import serial
 import time
 import os
-from printTest import find_log_and_print_file
 
 # Configuration for serial connection
 SERIAL_PORT = 'COM1'  # Replace with your COM port

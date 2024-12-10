@@ -47,12 +47,10 @@ def write_and_wait(command, expected_prompt, timeout=60):
     return wait_for_prompt(expected_prompt, timeout)
 
 def delete_configuration_password():
+    ser.write(b"flash\n")
     ser.write(b"set SWITCH_NUMBER 1\n")
     ser.write(b"set BOOT\n")
     ser.write(b"set SWITCH_PRIORITY 15\n")
-
-    ser.write(b"flash\n")
-    ser.flush()
 
     time.sleep(10)
     write_and_wait(b"", "switch:")
@@ -243,7 +241,7 @@ def close_restart_switch():
 def main():
     """Main function to execute all steps."""
     try:
-        if write_and_wait(b'', "switch:", timeout=250)[0]:
+        if write_and_wait(b'\n', "switch:", timeout=250)[0]:
             delete_configuration_password()
             serial_number = get_snmp_chassis_serial()
             if serial_number:
