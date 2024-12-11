@@ -1,37 +1,43 @@
 
-Router#
-Router#
-*Jan  1 00:13:55.431: Unable to open socket on port 161
-*Jan  1 00:13:55.919: %SYS-5-CONFIG_I: Configured from console by console
-Router#terminal width 511
-Router#terminal length 0
-Router#
-Router#
-Router#
-Router#show snmp chassis
-FTX1142Y18V
-Router#
-Router#term length 0
-Router#
-Router#!
-Router#
-Router#show inventory
-NAME: "chassis", DESCR: "1811 chassis"
-PID: CISCO1811/K9      , VID: V04, SN: FTX1142Y18V
+Switch>
+Switch>
+Switch>terminal width 511
+Switch>terminal length 0
+Switch>
+Switch>
+Switch>show diagnostic result swi all
+
+Switch 1:   SerialNo : FOC1821Z0MK
+
+  Overall Diagnostic Result for Switch 1 : PASS
+
+  Test results: (. = Pass, F = Fail, U = Untested)
+
+    1) TestPortAsicStackPortLoopback ---> .
+    2) TestPortAsicLoopback ------------> .
+    3) TestPortAsicCam -----------------> .
+    4) TestPortAsicMem -----------------> .
+    5) TestInlinePwrCtlr ---------------> .
 
 
-Router#
-Router#show hardware
-Cisco IOS Software, C181X Software (C181X-ADVIPSERVICESK9-M), Version 12.4(6)T8, RELEASE SOFTWARE (fc3)
+Switch>
+Switch>show post
+              ^
+% Invalid input detected at '^' marker.
+
+Switch>
+Switch>show version
+Cisco IOS Software, C2960S Software (C2960S-UNIVERSALK9-M), Version 15.0(2a)SE9, RELEASE SOFTWARE (fc1)
 Technical Support: http://www.cisco.com/techsupport
-Copyright (c) 1986-2007 by Cisco Systems, Inc.
-Compiled Wed 25-Jul-07 14:51 by khuie
+Copyright (c) 1986-2015 by Cisco Systems, Inc.
+Compiled Mon 21-Dec-15 02:41 by prod_rel_team
 
-ROM: System Bootstrap, Version 12.3(8r)YH8, RELEASE SOFTWARE (fc2)
+ROM: Bootstrap program is C2960S board boot loader
+BOOTLDR: C2960S Boot Loader (C2960S-HBOOT-M) Version 12.2(55r)SE, RELEASE SOFTWARE (fc1)
 
-Router uptime is 0 minutes
+Switch uptime is 1 hour, 19 minutes
 System returned to ROM by power-on
-System image file is "flash:c181x-advipservicesk9-mz.124-6.T8.bin"
+System image file is "flash:/c2960s-universalk9-mz.150-2a.SE9.bin"
 
 
 This product contains cryptographic features and is subject to United
@@ -49,31 +55,64 @@ http://www.cisco.com/wwl/export/crypto/tool/stqrg.html
 If you require further assistance please contact us by sending email to
 export@cisco.com.
 
-Cisco 1811 (MPC8500) processor (revision 0x400) with 118784K/12288K bytes of memory.
-Processor board ID FTX1142Y18V, with hardware revision 0000
+cisco WS-C2960S-24PS-L (PowerPC) processor (revision H0) with 131072K bytes of memory.
+Processor board ID FOC1821Z0MK
+Last reset from power-on
+1 Virtual Ethernet interface
+1 FastEthernet interface
+28 Gigabit Ethernet interfaces
+The password-recovery mechanism is enabled.
 
-10 FastEthernet interfaces
-1 Serial interface
-1 terminal line
-31360K bytes of ATA CompactFlash (Read/Write)
+512K bytes of flash-simulated non-volatile configuration memory.
 
-Configuration register is 0x2142 (will be 0x2102 at next reload)
+Base ethernet MAC Address       : BC:67:1C:07:BB:80
+Motherboard assembly number     : 73-11908-09
+Power supply part number        : 341-0393-02
+Motherboard serial number       : FOC18210MC8
+Power supply serial number      : DCA1818U0JN
+Model revision number           : H0
+Motherboard revision number     : A0
+Model number                    : WS-C2960S-24PS-L
+Daughterboard assembly number   : 73-11933-04
+Daughterboard serial number     : FOC182030SJ
+System serial number            : FOC1821Z0MK
+Top Assembly Part Number        : 800-30945-04
+Top Assembly Revision Number    : C0
+Version ID                      : V04
+CLEI Code Number                : COMGE00ARD
+Daughterboard revision number   : A0
+Hardware Board Revision Number  : 0x01
 
-Router#
-Router#show env all
 
- Fan Running successfully. 
+Switch Ports Model              SW Version            SW Image                 
+------ ----- -----              ----------            ----------               
+*    1 28    WS-C2960S-24PS-L   15.0(2a)SE9           C2960S-UNIVERSALK9-M     
 
- Board Temperature : normal.
 
-Router#reload
+Configuration register is 0xF
 
-System configuration has been modified. Save? [yes/no]: no
-Proceed with reload? [confirm]
+Switch>
+Switch>show env all
+FAN is OK
+SYSTEM TEMPERATURE is OK
+System Temperature Value: 24 Degree Celsius
+System Temperature State: GREEN
 
-*Jan  1 00:14:11.619: %SYS-5-RELOAD: Reload requested by console. Reload Reason: Reload Command.
-System Bootstrap, Version 12.3(8r)YH8, RELEASE SOFTWARE (fc2)
+Yellow Threshold : 51 Degree Celsius
+Red Threshold    : 61 Degree Celsius
+SW  PID                 Serial#     Status           Sys Pwr  PoE Pwr  Watts
+---  ------------------  ----------  ---------------  -------  -------  -----
+ 1  Built-in                                         Good
 
-Technical Support: http://www.cisco.com/techsupport
-Copyright (c) 2006 by cisco Systems, Inc.
-exit
+SW  Status          RPS Name          RPS Serial#  RPS Port#
+--  -------------   ----------------  -----------  ---------
+1   <>              <>
+
+
+Switch>
+Switch>show inventory
+NAME: "1", DESCR: "WS-C2960S-24PS-L"
+PID: WS-C2960S-24PS-L  , VID: V04  , SN: FOC1821Z0MK
+
+
+Switch>
