@@ -3,148 +3,149 @@ import time
 import os
 
 # Configuration for serial connection
-SERIAL_PORT = 'COM1'    # Replace with your COM port
-BAUD_RATE = 9600         # Standard baud rate for Cisco devices
-TIMEOUT = 1              # Serial read timeout in seconds
+SERIAL_PORT = 'COM1'  # Replace with your COM port
+BAUD_RATE = 9600       # Standard baud rate for Cisco devices
+LOG_DIR = os.path.join(os.path.expanduser("~"), "Desktop", "CiscoLogs")  # Log directory on Desktop
 
-# Initialize serial connection
+# Establish the serial connection
 ser = serial.Serial(
     port=SERIAL_PORT,
     baudrate=BAUD_RATE,
-    timeout=TIMEOUT,
+    timeout=1,
     bytesize=serial.EIGHTBITS,
     parity=serial.PARITY_NONE,
     stopbits=serial.STOPBITS_ONE,
 )
 
-def send_breaks_until_rommon(prompt, timeout=10):
-    """Send break signals until the specified ROMMON prompt is detected or timeout reached."""
-    end_time = time.time() + timeout
-    time.sleep(5)
-    while True:
+def send_break_signal():
+    """Send a break signal to enter ROMMON mode."""
+    print("Sending break signals...")
+    time.sleep(3)
+    for _ in range(6):
         ser.send_break()
-        time.sleep(0.5)
-        output = read_all_output()
-        if output:
-            print(output, end="")
-            if prompt in output:
-                print(f"Detected '{prompt}' prompt.")
-                return True
-        if time.time() > end_time:
-            raise Exception(f"Timeout: Unable to detect '{prompt}' prompt.")
-
-def read_all_output():
-    """Read all available output from the serial buffer."""
-    time.sleep(0.5)
-    out = ""
-    while ser.in_waiting > 0:
-        out += ser.read(ser.in_waiting).decode(errors='ignore')
-    return out
+        time.sleep(1)
+    ser.write(b'\n')
 
 def wait_for_prompt(prompt, timeout=90):
-    """Wait for a specific prompt within the given timeout."""
-    print(f"Waiting for prompt: {prompt}")
-    end_time = time.time() + timeout
-    buffer = ""
-    while time.time() < end_time:
-        data = read_all_output()
-        if data:
-            buffer += data
+    """Wait for a specific prompt to appear within the timeout."""
+    start_time = time.time()
+    output = ""
+    current_timeout = 1
+
+    while True:
+        if ser.in_waiting > 0:
+            data = ser.read(ser.in_waiting).decode(errors="ignore")
+            output += data
             print(data, end="")
-            if prompt in buffer:
+
+            if prompt in output:
                 print(f"\nFound prompt: {prompt}")
-                return True
-        time.sleep(1)
-    raise Exception(f"Timeout reached while waiting for prompt: {prompt}")
+                return True, output
 
-def send_command(cmd, expect=None, timeout=30):
-    """Send a command and optionally wait for an expected prompt."""
-    if not cmd.endswith("\n"):
-        cmd += "\n"
-    ser.write(cmd.encode())
-    if expect:
-        return wait_for_prompt(expect, timeout=timeout)
-    else:
-        time.sleep(2)  # Just send and wait a bit
-        return True
+        if time.time() - start_time > timeout:
+            print(f"\nTimeout reached while waiting for: {prompt}")
+            return False, output
 
-def answer_initial_dialog(prompt):
-    """
-    After reset, the device prompts:
-    'Would you like to enter the initial configuration dialog? [yes/no]:'
-    Respond with 'no' and then wait for the Router prompt.
-    """
-    print("Waiting for initial configuration dialog prompt...")
-    dialog_prompt = "Would you like to enter the initial configuration dialog? [yes/no]:"
-    if wait_for_prompt(dialog_prompt, timeout=10):
-        ser.write(("n\n\n").encode())
-        time.sleep(1)
-        # After responding 'no', we expect a Router> prompt
-        wait_for_prompt(prompt, timeout=60)
+        time.sleep(current_timeout)
+        current_timeout = min(current_timeout + 1, 5)
 
-def enter_enable_mode():
-    """From Router> to Router# by sending 'enable'."""
-    print("Entering enable mode...")
-    send_command("enable")
-    wait_for_prompt("Router#")
+def write_and_wait(command, expected_prompt, timeout=90):
+    """Send a command and wait for the expected prompt."""
+    ser.write(command)
+    return wait_for_prompt(expected_prompt, timeout)
 
 def get_snmp_chassis_serial():
-    """Retrieve the SNMP chassis serial number using 'show snmp chassis'."""
-    print("Getting SNMP chassis serial number...")
-    ser.write(b"show snmp chassis\n")
+    """Retrieve the SNMP chassis serial number."""
+    ser.reset_input_buffer()
+    ser.write(b"\n show snmp chassis\n")
     time.sleep(2)
-    output = read_all_output()
-    print(output)
-    # Try to extract a likely serial number
-    # For simplicity, assume the serial number line is directly visible
-    # Adjust parsing logic as needed
-    lines = output.splitlines()
-    for line in lines:
-        line = line.strip()
-        # Heuristic: Serial numbers often alphanumeric and >5 chars
-        if line and len(line) > 5 and line.isalnum():
-            print(f"SNMP Chassis Serial Number: {line}")
-            return line
+    found, output = wait_for_prompt("Router#", timeout=10)
+
+    if found:
+        lines = output.splitlines()
+        for line in lines:
+            serial_num = line.strip()
+            if serial_num and serial_num.isalnum() and len(serial_num) > 5:
+                print(f"SNMP Chassis Serial Number: {serial_num}")
+                return serial_num
+
     print("Failed to retrieve SNMP chassis information.")
     return None
+
+def create_log_file(serial_number):
+    """Create a log file named after the serial number on the Desktop."""
+    if not os.path.exists(LOG_DIR):
+        os.makedirs(LOG_DIR)
+    return open(os.path.join(LOG_DIR, f"{serial_number}.txt"), "w")
 
 def capture_cisco_commands(log_file):
     """Capture output from a list of Cisco commands and log them."""
     commands = [
         "term length 0",
+        "!",
         "show inventory",
         "show hardware",
         "show env all",
-        "show license feature",
-        "show license status"
     ]
     for cmd in commands:
-        log_file.write(f"\nCommand: {cmd}\n")
-        ser.write((cmd + "\n").encode())
+        log_file.write(f"\n{cmd}\n")
+        ser.write((cmd + "\r").encode())
         time.sleep(2)
-        output = read_all_output()
+        
+        output = ""
+        while ser.in_waiting > 0:
+            output += ser.read(ser.in_waiting).decode(errors="ignore")
         log_file.write(output + "\n")
         print(output)
 
+def configure_router():
+    """Run initial configuration commands on the router."""
+    if write_and_wait(b"confreg 0x2142\n", "rommon 2 >")[0]:
+        print("Configuration register set to 0x2142.")
+        if write_and_wait(b"reset\n", "Would you like to enter the initial configuration dialog? [yes/no]:")[0]:
+            print("Router is resetting...")
+            ser.write(b'no\n')
+            ser.write(b'\r')
+            ser.flush()
+            if write_and_wait(b"", "Router>")[0]:
+                if write_and_wait(b"enable\n", "Router#")[0]:
+                    print("Reached user mode prompt.")
+                    configure_terminal()
+
+def configure_terminal():
+    """Enter terminal configuration mode and set up basic configurations."""
+    if write_and_wait(b"\nwrite erase\n", "Continue? [confirm]")[0]:
+        if write_and_wait(b"\n", "Router#")[0]:
+            if write_and_wait(b"configure terminal\n", "Router(config)#")[0]:
+                write_and_wait(b"config-register 0x2102\n", "Router(config)#")
+                write_and_wait(b"no logging monitor\n", "Router(config)#")
+                write_and_wait(b"snmp-server community public RO\n", "Router(config)#")
+                write_and_wait(bytes([26]), "#")
+
+def reload_router():
+    """Send the reload command and respond 'no' to the save configuration prompt."""
+    if write_and_wait(b"\nreload\n", "System configuration has been modified. Save? [yes/no]:")[0]:
+        print("Sending 'no' to discard saving the configuration...")
+        ser.write(b"no\n")
+        ser.flush()  # Ensure 'no' is sent immediately
+
+        # Wait for confirmation of the reload or any final prompt if necessary
+        write_and_wait(b"", "Proceed with reload? [confirm]", timeout=10)
+        ser.write(b"\n")  # Send confirmation
+        ser.flush()
+
 def main():
+    """Main function to execute all steps."""
     try:
-        if not ser.is_open:
-            raise Exception("Failed to open serial port.")
-        print(f"Connected to {SERIAL_PORT}.")
-
-        send_breaks_until_rommon("rommon 1 >")
-
-        print("Sending 'confreg 0x2142' command...")
-        send_command("confreg 0x2142")
-
-        print("Sending 'reset' command to reboot the device...")
-        send_command("reset")
-
-        print("Waiting for the device to reboot (60s)...")
-        time.sleep(60)
-
-        answer_initial_dialog("Router>")
-
+        send_break_signal()
+        if write_and_wait(b'', "rommon 1 >", timeout=10)[0]:
+            configure_router()
+            serial_number = get_snmp_chassis_serial()
+            if serial_number:
+                with create_log_file(serial_number) as log_file:
+                    capture_cisco_commands(log_file)
+                
+                reload_router() 
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:
