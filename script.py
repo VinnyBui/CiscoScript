@@ -1,6 +1,7 @@
 import serial
 import time
 import os
+from netmiko import ConnectHandler
 
 # Configuration for serial connection
 SERIAL_PORT = 'COM1'  # Replace with your COM port
