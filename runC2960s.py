@@ -143,7 +143,7 @@ def connect_netmiko():
         "global_delay_factor": 2,
         "fast_cli": False, 
         "session_log": "session_log.txt", 
-        "read_timeout_override" : 15,
+        "read_timeout_override" : 30,
     }
     print("Connecting via Netmiko over serial...")
     net_connect = ConnectHandler(**device)
@@ -197,23 +197,47 @@ def test_log(net_connect):
   version_data = parse_version_data(log_contents)
   new_file_name = f"{version_data['model']}_{version_data['serial_number']}.txt"
   new_log_path = os.path.join(LOG_DIR, new_file_name)
-  os.rename(log_path, new_log_path)
 
+  # Handle existing file before renaming
+  if os.path.exists(new_log_path):
+    print(f"File {new_file_name} already exists. Overwriting...")
+    os.remove(new_log_path)
+  
+  os.rename(log_path, new_log_path)
   print(f"Test logs saved to {new_log_path}")
+
+# def restart_and_close(net_connect):
+#   try:
+#     net_connect.send_command("!")
+#     output = net_connect.send_command("write erase", expect_string="Erasing the nvram filesystem will remove all configuration files!", read_timeout=30)
+#     print(output)
+#     net_connect.send_command("\r")
+#     print("Configuration erased")
+
+#     output = net_connect.send_command(
+#       "reload", expect_string="System configuration has been modified. Save? [yes/no]:"
+#     )
+#     print(output)
+#     net_connect.send_command("no")
+#     output = net_connect.send_command(expect_string="Proceed with reload? [confirm]")
+#     print(output)
+#     net_connect.send_command("\r")  
+#     print("Machine is restarting.")
+  
+#   except Exception as e:
+#     print(f"An error occurred during restart and close operations: {e}")
 
 def main():
   try:
-    # if write_and_wait(b'\r', "switch:", timeout=60)[0]:
-    #   rommon_mode()
-    #   run_diagnostic()
-    #   found, output = wait_for_prompt("Switch#\r")
-    #   if found:
-    #     close_pyserial()
-    #     net_connect = connect_netmiko()
-    #     test_log(net_connect)
-    close_pyserial()
-    net_connect = connect_netmiko()
-    test_log(net_connect)
+    if write_and_wait(b'\r', "switch:", timeout=60)[0]:
+      rommon_mode()
+      run_diagnostic()
+      found, output = wait_for_prompt("Switch#\r")
+      if found:
+        close_pyserial()
+        net_connect = connect_netmiko()
+        test_log(net_connect)
+        net_connect.disconnect()
 
 
   except Exception as e:
