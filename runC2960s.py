@@ -274,7 +274,7 @@ def main():
   except Exception as e:
     print(f"An error occurred: {e}")
   finally:
-    print("Connection closed.")
+    print(f"Connection closed on {SERIAL_PORT}")
 
 if __name__ == "__main__":
   main()
