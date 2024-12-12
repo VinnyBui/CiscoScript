@@ -1,6 +1,7 @@
 import serial
 import time
 import os
+import re
 from netmiko import ConnectHandler
 
 # Configuration for serial connection
@@ -149,13 +150,24 @@ def connect_netmiko():
     print("Netmiko connection established.")
     return net_connect
 
-def get_file_name(log_path):
-  with open(log_path, "r") as file:
-    # Read the file contents
-    contents = file.read()
+def parse_version_data(log_contents):
+    """
+    Parse the log contents to extract Model and Serial Number.
+    """
+    try:
+        # Extract Model
+        model_match = re.search(r"Model number\s+:\s+(\S+)", log_contents)
+        model = model_match.group(1) if model_match else "UNKNOWN_MODEL"
 
-    print("PRINTING RESULT")
-    print(contents)
+        # Extract System Serial Number
+        serial_match = re.search(r"System serial number\s+:\s+(\S+)", log_contents)
+        serial = serial_match.group(1) if serial_match else "UNKNOWN_SERIAL"
+
+        return {"model": model, "serial_number": serial}
+
+    except Exception as e:
+        print(f"Unexpected error during parsing: {e}")
+        return {"model": "UNKNOWN_MODEL", "serial_number": "UNKNOWN_SERIAL"}
 
 def test_log(net_connect):
   """Run diagnostic and informational commands via Netmiko and log output."""
@@ -178,8 +190,16 @@ def test_log(net_connect):
       log_file.write(output + "\n")
       print(output)
   
-  get_file_name(log_path)
-  print(f"Test logs saved to {log_path}")
+  # Parse the log file to extract details
+  with open(log_path, "r") as file:
+    log_contents = file.read()
+
+  version_data = parse_version_data(log_contents)
+  new_file_name = f"{version_data['model']}_{version_data['serial_number']}.txt"
+  new_log_path = os.path.join(LOG_DIR, new_file_name)
+  os.rename(log_path, new_log_path)
+
+  print(f"Test logs saved to {new_log_path}")
 
 def main():
   try:
