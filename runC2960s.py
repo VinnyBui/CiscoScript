@@ -151,23 +151,28 @@ def connect_netmiko():
     return net_connect
 
 def parse_version_data(log_contents):
-    """
-    Parse the log contents to extract Model and Serial Number.
-    """
-    try:
-        # Extract Model
-        model_match = re.search(r"Model number\s+:\s+(\S+)", log_contents)
-        model = model_match.group(1) if model_match else "UNKNOWN_MODEL"
+  try:
+    # Extract Model
+    model_match = re.search(r"Model number\s+:\s+(\S+)", log_contents)
+    model = model_match.group(1) if model_match else "UNKNOWN_MODEL"
 
-        # Extract System Serial Number
-        serial_match = re.search(r"System serial number\s+:\s+(\S+)", log_contents)
-        serial = serial_match.group(1) if serial_match else "UNKNOWN_SERIAL"
+    # Extract System Serial Number
+    serial_match = re.search(r"System serial number\s+:\s+(\S+)", log_contents)
+    serial = serial_match.group(1) if serial_match else "UNKNOWN_SERIAL"
 
-        return {"model": model, "serial_number": serial}
+    # Extract SW Version (First Occurrence)
+    version_match = re.search(r"Version\s+([\d\.()a-zA-Z]+)", log_contents)
+    sw_version = version_match.group(1) if version_match else "UNKNOWN_VERSION"
 
-    except Exception as e:
-        print(f"Unexpected error during parsing: {e}")
-        return {"model": "UNKNOWN_MODEL", "serial_number": "UNKNOWN_SERIAL"}
+    return {"model": model, "serial_number": serial, "sw_version": sw_version}
+
+  except Exception as e:
+    print(f"Unexpected error during parsing: {e}")
+    return {
+      "model": "UNKNOWN_MODEL",
+      "serial_number": "UNKNOWN_SERIAL",
+      "sw_version": "UNKNOWN_VERSION",
+    }
 
 def test_log(net_connect):
   """Run diagnostic and informational commands via Netmiko and log output."""
@@ -195,7 +200,7 @@ def test_log(net_connect):
     log_contents = file.read()
 
   version_data = parse_version_data(log_contents)
-  new_file_name = f"{version_data['model']}_{version_data['serial_number']}.txt"
+  new_file_name = f"{version_data['model']}_{version_data['serial_number']}_{version_data['sw_version']}.txt"
   new_log_path = os.path.join(LOG_DIR, new_file_name)
 
   # Handle existing file before renaming
@@ -229,20 +234,24 @@ def test_log(net_connect):
 
 def main():
   try:
-    if write_and_wait(b'\r', "switch:", timeout=60)[0]:
-      rommon_mode()
-      run_diagnostic()
-      found, output = wait_for_prompt("Switch#\r")
-      if found:
+    # if write_and_wait(b'\r', "switch:", timeout=60)[0]:
+    #   rommon_mode()
+    #   run_diagnostic()
+    #   found, output = wait_for_prompt("Switch#\r")
+    #   if found:
+    #     close_pyserial()
+    #     net_connect = connect_netmiko()
+    #     test_log(net_connect)
+    #     net_connect.disconnect()
         close_pyserial()
         net_connect = connect_netmiko()
         test_log(net_connect)
-        net_connect.disconnect()
 
 
   except Exception as e:
     print(f"An error occurred: {e}")
   finally:
+    net_connect.disconnect()
     print("Connection closed.")
 
 if __name__ == "__main__":
