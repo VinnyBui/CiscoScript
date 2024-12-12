@@ -2,12 +2,37 @@ import serial
 import time
 import os
 import re
+import serial.tools.list_ports
 from netmiko import ConnectHandler
 
-# Configuration for serial connection
-SERIAL_PORT = 'COM1'  # Replace with your COM port
 BAUD_RATE = 9600       # Standard baud rate for Cisco devices
 LOG_DIR = os.path.join(os.path.expanduser("~"), "Desktop", "CiscoLogs")
+
+def list_com_ports():
+    """
+    List all available COM ports and let the user select one.
+    Returns the selected COM port name (e.g., 'COM1').
+    """
+    ports = list(serial.tools.list_ports.comports())
+    if not ports:
+        raise Exception("No COM ports available. Please check your connection.")
+
+    print("Available COM Ports:")
+    for i, port in enumerate(ports):
+        print(f"{i + 1}: {port.device} - {port.description}")
+
+    while True:
+        try:
+            choice = int(input("Select a COM port (by number): "))
+            if 1 <= choice <= len(ports):
+                return ports[choice - 1].device
+            else:
+                print("Invalid choice. Please select a valid number.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
+# Dynamically select the COM port
+SERIAL_PORT = list_com_ports()
 
 ser = serial.Serial(
     port=SERIAL_PORT,
@@ -31,7 +56,7 @@ def send_command(command, delay=1):
     ser.flush()
     time.sleep(delay)
 
-def wait_for_prompt(prompt, timeout=60):
+def wait_for_prompt(prompt, timeout=120):
     start_time = time.time()
     output = ""
     current_timeout = 1
@@ -52,7 +77,7 @@ def wait_for_prompt(prompt, timeout=60):
         time.sleep(current_timeout)
         current_timeout = min(current_timeout + 1, 5)
 
-def write_and_wait(command, expected_prompt, timeout=60):
+def write_and_wait(command, expected_prompt, timeout=120):
     send_command(command)
     return wait_for_prompt(expected_prompt, timeout)
 
@@ -91,8 +116,8 @@ def rommon_reset():
   return
 
 def rommon_mode():
-  send_command(b"flash\r")
-  found, output = wait_for_prompt("switch:")
+  send_command(b"flash\r", delay=5)
+  found, output = wait_for_prompt("switch:", timeout=500)
   if found:
     send_command(b"set SWITCH_NUMBER 1\r")
     send_command(b"set SWITCH_PRIORITY 1\r")
@@ -112,9 +137,11 @@ def rommon_mode():
         send_command(b"reset\r")
         send_command(b"y\r")
         rommon_reset()
+  else:
+    raise Exception(f"Flash initialization failed.")
 
 def run_diagnostic():
-  found, output = wait_for_prompt("Switch#")
+  found, output = wait_for_prompt("Switch#", timeout=200)
   if found:
     send_command(b"diagnostic start swi 1 test all\r")
     send_command(b"y\r")
@@ -211,47 +238,42 @@ def test_log(net_connect):
   os.rename(log_path, new_log_path)
   print(f"Test logs saved to {new_log_path}")
 
-# def restart_and_close(net_connect):
-#   try:
-#     net_connect.send_command("!")
-#     output = net_connect.send_command("write erase", expect_string="Erasing the nvram filesystem will remove all configuration files!", read_timeout=30)
-#     print(output)
-#     net_connect.send_command("\r")
-#     print("Configuration erased")
+def restart_and_close(net_connect):
+  try:
+    net_connect.send_command("!")
+    output = net_connect.send_command("write erase", expect_string="Erasing the nvram filesystem will remove all configuration files!", read_timeout=30)
+    print(output)
+    net_connect.send_command("\r")
+    print("Configuration erased")
 
-#     output = net_connect.send_command(
-#       "reload", expect_string="System configuration has been modified. Save? [yes/no]:"
-#     )
-#     print(output)
-#     net_connect.send_command("no")
-#     output = net_connect.send_command(expect_string="Proceed with reload? [confirm]")
-#     print(output)
-#     net_connect.send_command("\r")  
-#     print("Machine is restarting.")
+    output = net_connect.send_command(
+      "reload", expect_string="System configuration has been modified. Save? [yes/no]:"
+    )
+    print(output)
+    net_connect.send_command("no")
+    output = net_connect.send_command(expect_string="Proceed with reload? [confirm]")
+    print(output)
+    net_connect.send_command("\r")  
+    print("Machine is restarting.")
   
-#   except Exception as e:
-#     print(f"An error occurred during restart and close operations: {e}")
+  except Exception as e:
+    print(f"An error occurred during restart and close operations: {e}")
 
 def main():
   try:
-    # if write_and_wait(b'\r', "switch:", timeout=60)[0]:
-    #   rommon_mode()
-    #   run_diagnostic()
-    #   found, output = wait_for_prompt("Switch#\r")
-    #   if found:
-    #     close_pyserial()
-    #     net_connect = connect_netmiko()
-    #     test_log(net_connect)
-    #     net_connect.disconnect()
+    if write_and_wait(b'\r', "switch:", timeout=60)[0]:
+      rommon_mode()
+      run_diagnostic()
+      found, output = wait_for_prompt("Switch#")
+      if found:
         close_pyserial()
         net_connect = connect_netmiko()
         test_log(net_connect)
-
+        net_connect.disconnect()
 
   except Exception as e:
     print(f"An error occurred: {e}")
   finally:
-    net_connect.disconnect()
     print("Connection closed.")
 
 if __name__ == "__main__":

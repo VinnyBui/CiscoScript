@@ -7,17 +7,17 @@ Switch#
 Switch#
 Switch#show diagnostic result swi all
 
-Switch 1:   SerialNo : FOC1821Z0MK
+Switch 1:   SerialNo : FOC1545Z0DJ
 
-  Overall Diagnostic Result for Switch 1 : UNTESTED
+  Overall Diagnostic Result for Switch 1 : PASS
 
   Test results: (. = Pass, F = Fail, U = Untested)
 
-    1) TestPortAsicStackPortLoopback ---> U
-    2) TestPortAsicLoopback ------------> U
-    3) TestPortAsicCam -----------------> U
-    4) TestPortAsicMem -----------------> U
-    5) TestInlinePwrCtlr ---------------> U
+    1) TestPortAsicStackPortLoopback ---> .
+    2) TestPortAsicLoopback ------------> .
+    3) TestPortAsicCam -----------------> .
+    4) TestPortAsicMem -----------------> .
+    5) TestInlinePwrCtlr ---------------> .
 
 
 Switch#
@@ -59,17 +59,18 @@ POST: EMAC Loopback Tests : End, Status Passed
 
 Switch#
 Switch#show version
-Cisco IOS Software, C2960S Software (C2960S-UNIVERSALK9-M), Version 15.0(2a)SE9, RELEASE SOFTWARE (fc1)
+Cisco IOS Software, C2960S Software (C2960S-UNIVERSALK9-M), Version 15.0(2)SE4, RELEASE SOFTWARE (fc1)
 Technical Support: http://www.cisco.com/techsupport
-Copyright (c) 1986-2015 by Cisco Systems, Inc.
-Compiled Mon 21-Dec-15 02:41 by prod_rel_team
+Copyright (c) 1986-2013 by Cisco Systems, Inc.
+Compiled Wed 26-Jun-13 02:59 by prod_rel_team
 
 ROM: Bootstrap program is C2960S board boot loader
 BOOTLDR: C2960S Boot Loader (C2960S-HBOOT-M) Version 12.2(55r)SE, RELEASE SOFTWARE (fc1)
 
-Switch uptime is 9 minutes
+Switch uptime is 2 minutes
 System returned to ROM by power-on
-System image file is "flash:/c2960s-universalk9-mz.150-2a.SE9.bin"
+System restarted at 01:27:23 UTC Wed Mar 30 2011
+System image file is "flash:/c2960s-universalk9-mz.150-2.SE4/c2960s-universalk9-mz.150-2.SE4.bin"
 
 
 This product contains cryptographic features and is subject to United
@@ -87,8 +88,8 @@ http://www.cisco.com/wwl/export/crypto/tool/stqrg.html
 If you require further assistance please contact us by sending email to
 export@cisco.com.
 
-cisco WS-C2960S-24PS-L (PowerPC) processor (revision H0) with 131072K bytes of memory.
-Processor board ID FOC1821Z0MK
+cisco WS-C2960S-24PS-L (PowerPC) processor (revision D0) with 131072K bytes of memory.
+Processor board ID FOC1545Z0DJ
 Last reset from power-on
 1 Virtual Ethernet interface
 1 FastEthernet interface
@@ -96,30 +97,28 @@ Last reset from power-on
 The password-recovery mechanism is enabled.
 
 512K bytes of flash-simulated non-volatile configuration memory.
-Base ethernet MAC Address       : BC:67:1C:07:BB:80
-Motherboard assembly number     : 73-11908-09
+Base ethernet MAC Address       : 08:D0:9F:15:A5:00
+Motherboard assembly number     : 73-11908-06
 Power supply part number        : 341-0393-02
-Motherboard serial number       : FOC18210MC8
-Power supply serial number      : DCA1818U0JN
-Model revision number           : H0
+Motherboard serial number       : FOC15441S3J
+Power supply serial number      : LIT15360E7A
+Model revision number           : D0
 Motherboard revision number     : A0
 Model number                    : WS-C2960S-24PS-L
-
 Daughterboard assembly number   : 73-11933-04
-Daughterboard serial number     : FOC182030SJ
-System serial number            : FOC1821Z0MK
-Top Assembly Part Number        : 800-30945-04
+Daughterboard serial number     : FOC15431TLD
+System serial number            : FOC1545Z0DJ
+Top Assembly Part Number        : 800-30945-02
 Top Assembly Revision Number    : C0
-Version ID                      : V04
-CLEI Code Number                : COMGE00ARD
-
+Version ID                      : V02
+CLEI Code Number                : COMGE00ARB
 Daughterboard revision number   : A0
 Hardware Board Revision Number  : 0x01
 
 
 Switch Ports Model              SW Version            SW Image                 
 ------ ----- -----              ----------            ----------               
-*    1 28    WS-C2960S-24PS-L   15.0(2a)SE9           C2960S-UNIVERSALK9-M     
+*    1 28    WS-C2960S-24PS-L   15.0(2)SE4            C2960S-UNIVERSALK9-M     
 
 
 Configuration register is 0xF
@@ -128,7 +127,7 @@ Switch#
 Switch#show env all
 FAN is OK
 SYSTEM TEMPERATURE is OK
-System Temperature Value: 19 Degree Celsius
+System Temperature Value: 20 Degree Celsius
 System Temperature State: GREEN
 Yellow Threshold : 51 Degree Celsius
 Red Threshold    : 61 Degree Celsius
@@ -144,7 +143,7 @@ SW  Status          RPS Name          RPS Serial#  RPS Port#
 Switch#
 Switch#show inventory
 NAME: "1", DESCR: "WS-C2960S-24PS-L"
-PID: WS-C2960S-24PS-L  , VID: V04  , SN: FOC1821Z0MK
+PID: WS-C2960S-24PS-L  , VID: V02  , SN: FOC1545Z0DJ
 
 
 Switch#
