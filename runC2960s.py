@@ -262,11 +262,11 @@ def restart_and_close(net_connect):
 
 def main():
   try:
-    # if write_and_wait(b'\r', "switch:", timeout=60)[0]:
-    #   rommon_mode()
-    #   run_diagnostic()
-    #   found, output = wait_for_prompt("Switch#")
-    #   if found:
+    if write_and_wait(b'\r', "switch:", timeout=60)[0]:
+      rommon_mode()
+      run_diagnostic()
+      found, output = wait_for_prompt("Switch#")
+      if found:
         close_pyserial()
         net_connect = connect_netmiko()
         test_log(net_connect)
