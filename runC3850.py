@@ -81,39 +81,32 @@ def write_and_wait(command, expected_prompt, timeout=120):
     send_command(command)
     return wait_for_prompt(expected_prompt, timeout)
 
-def delete_file(filename, prompt='Are you sure you want to delete', timeout=10):
-    """Delete a given file from flash and confirm deletion if prompted."""
-    cmd = f"delete flash:{filename}\r".encode()
-    send_command(cmd)
-    time.sleep(1)
-    found, output = wait_for_prompt(prompt, timeout)
-    if found:
-      print(output)
-      send_command(b"y\r")
-    else:
-        print(f"#Failed to find or delete {filename} (no prompt or file not found).")
+# def log_to_file(data):
+#     with open("rommon_reset_log.txt", "a") as log_file:
+#         log_file.write(data + "\n")
 
 def rommon_reset():
-  ser.reset_input_buffer()  # Clear buffer before waiting
-  found, output = wait_for_prompt('Press RETURN to get started!', timeout=350)
-  if found:
-    print("\r##Detected 'Press RETURN to get started!'. Sending Enter key.")
-    ser.reset_input_buffer()  # Clear the input buffer before sending Enter
-    send_command(b"\r") 
-    send_command(b"\r\r")
+  found, output = wait_for_prompt('Press RETURN to get started', timeout=350)
+  time.sleep(5)
+  ser.reset_input_buffer()  
+  ser.reset_output_buffer()
+  if not found:
+    raise Exception("Failed to find Press RETURN prompt")
+  print("\r##Detected 'Press RETURN to get started'. Sending Enter key.")
+  send_command(b"\r") 
 
-    found, output = wait_for_prompt("Would you like to enter the initial configuration dialog? [yes/no]:")
-    if not found:
-      print("\rFailed to detect initial configuration dialog. Output was:\r", output)
-      return
+  print("Waiting for 'Switch>' prompt...")
+  found, output = wait_for_prompt("Switch>", timeout=60)
+  if not found:
+    raise Exception("Failed to find 'Switch>' prompt")
 
-    time.sleep(1) 
-    send_command(b"n\r")
-    #Entering # mode
-    found, output = wait_for_prompt("Switch>\r")
-    if found:
-      send_command(b"en\r")
-  return
+  print("Found 'Switch>' prompt. Entering 'enable' mode.")
+  send_command(b"en\r")
+  time.sleep(2) 
+  found, output = wait_for_prompt("Switch#")
+  if not found:
+    raise Exception("Failed to enter 'enable' mode (Switch#)")
+  print("Successfully entered 'enable' mode.")
 
 def rommon_mode():
   send_command(b"flash\r", delay=5)
@@ -244,14 +237,12 @@ def main():
   try:
     if write_and_wait(b'\r', "switch:", timeout=120)[0]:
       rommon_mode()
-      found, ouput = wait_for_prompt("switch#")
-      if not found:
-        raise Exception("Failed to enter switch mode")
-      close_pyserial()
-      net_connect = connect_netmiko()
-      start_config(net_connect)
-      test_log(net_connect)
-      net_connect.disconnect()
+      if write_and_wait(b"\r", "Switch#")[0]:
+        close_pyserial()
+        net_connect = connect_netmiko()
+        start_config(net_connect)
+        test_log(net_connect)
+        net_connect.disconnect()
 
   except Exception as e:
     print(f"An error occurred: {e}")
