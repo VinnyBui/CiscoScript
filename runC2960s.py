@@ -95,7 +95,7 @@ def delete_file(filename, prompt='Are you sure you want to delete', timeout=10):
 #Need to clean rommon_reset function later
 def rommon_reset():
   ser.reset_input_buffer()  # Clear buffer before waiting
-  found, output = wait_for_prompt('Press RETURN to get started!', timeout=350)
+  found, output = wait_for_prompt('Press RETURN to get started!', timeout=600)
   if found:
     print("\r##Detected 'Press RETURN to get started!'. Sending Enter key.")
     ser.reset_input_buffer()  # Clear the input buffer before sending Enter
@@ -113,7 +113,8 @@ def rommon_reset():
     found, output = wait_for_prompt("Switch>\r")
     if found:
       send_command(b"en\r")
-  return
+  else:
+    raise Exception(f"Failed to find RETURN.")
 
 def rommon_mode():
   send_command(b"flash\r", delay=5)
@@ -261,11 +262,11 @@ def restart_and_close(net_connect):
 
 def main():
   try:
-    if write_and_wait(b'\r', "switch:", timeout=60)[0]:
-      rommon_mode()
-      run_diagnostic()
-      found, output = wait_for_prompt("Switch#")
-      if found:
+    # if write_and_wait(b'\r', "switch:", timeout=60)[0]:
+    #   rommon_mode()
+    #   run_diagnostic()
+    #   found, output = wait_for_prompt("Switch#")
+    #   if found:
         close_pyserial()
         net_connect = connect_netmiko()
         test_log(net_connect)
