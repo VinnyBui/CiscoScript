@@ -7,14 +7,15 @@ Switch#
 Switch#
 Switch#show diagnostic result swi all
 
+
 Switch 1:   SerialNo : FOC1927Y3R3
 
-  Overall Diagnostic Result for Switch 1 : MAJOR ERROR
+  Overall Diagnostic Result for Switch 1 : PASS
 
   Test results: (. = Pass, F = Fail, U = Untested)
 
     1) TestPortAsicStackPortLoopback ---> .
-    2) TestPortAsicLoopback ------------> F
+    2) TestPortAsicLoopback ------------> .
     3) TestPortAsicRingLoopback --------> .
     4) TestPortAsicCam -----------------> .
     5) TestMicRingLoopback -------------> .
@@ -23,48 +24,19 @@ Switch 1:   SerialNo : FOC1927Y3R3
 
 
 Switch#
-Switch#show post
-Stored system POST messages:
-
-Switch 1
----------
-
-POST: MA BIST : Begin
-POST: MA BIST : End, Status Passed
-
-POST: TCAM BIST : Begin
-POST: TCAM BIST : End, Status Passed
-
-POST: Thermal, Fan Tests : Begin
-POST: Thermal, Fan Tests : End, Status Passed
-
-POST: PortASIC Stack Port Loopback Tests : Begin
-POST: PortASIC Stack Port Loopback Tests : End, Status Passed
-
-
-POST: PortASIC Port Loopback Tests : Begin
-POST: PortASIC Port Loopback Tests : End, Status Passed
-
-POST: EMAC Loopback Tests : Begin
-POST: EMAC Loopback Tests : MAC Loopback Passed
-POST: EMAC Loopback Tests : PHY Loopback Passed
-POST: EMAC Loopback Tests : End, Status Passed
-
-Switch#
 Switch#show version
-Cisco IOS Software, C2960X Software (C2960X-UNIVERSALK9-M), Version 15.2(7)E2, RELEASE SOFTWARE (fc3)
+Cisco IOS Software, C2960X Software (C2960X-UNIVERSALK9-M), Version 15.2(4)E, RELEASE SOFTWARE (fc2)
 Technical Support: http://www.cisco.com/techsupport
-Copyright (c) 1986-2020 by Cisco Systems, Inc.
-Compiled Sat 14-Mar-20 16:53 by prod_rel_team
+Copyright (c) 1986-2015 by Cisco Systems, Inc.
+Compiled Mon 28-Sep-15 20:45 by prod_rel_team
 
 ROM: Bootstrap program is C2960X boot loader
 BOOTLDR: C2960X Boot Loader (C2960X-HBOOT-M) Version 15.2(6r)E, RELEASE SOFTWARE (fc1)
 
-Switch uptime is 3 minutes
+Switch uptime is 2 minutes
 System returned to ROM by power-on
-System restarted at 14:09:57 UTC Fri Dec 13 2024
-
-System image file is "flash:/c2960x-universalk9-mz.150-2a.EX5/c2960x-universalk9-mz.152-7.E2.bin"
+System restarted at 19:32:05 UTC Fri Dec 13 2024
+System image file is "flash:/c2960x-universalk9-mz.152-4.E.bin"
 Last reload reason: power-on
 
 
@@ -82,7 +54,6 @@ A summary of U.S. laws governing Cisco cryptographic products may be found at:
 http://www.cisco.com/wwl/export/crypto/tool/stqrg.html
 
 If you require further assistance please contact us by sending email to
-
 export@cisco.com.
 
 cisco WS-C2960X-48LPS-L (APM86XXX) processor (revision H0) with 524288K bytes of memory.
@@ -92,7 +63,6 @@ Last reset from power-on
 1 Virtual Ethernet interface
 1 FastEthernet interface
 52 Gigabit Ethernet interfaces
-2 Ten Gigabit Ethernet interfaces
 The password-recovery mechanism is enabled.
 
 512K bytes of flash-simulated non-volatile configuration memory.
@@ -109,16 +79,16 @@ Daughterboard serial number     : FOC19276CKJ
 System serial number            : FOC1927Y3R3
 Top Assembly Part Number        : 800-41467-01
 Top Assembly Revision Number    : D0
+
 Version ID                      : V02
 CLEI Code Number                : CMMLP00ARB
 Daughterboard revision number   : A0
 Hardware Board Revision Number  : 0x12
 
 
-
 Switch Ports Model                     SW Version            SW Image                 
 ------ ----- -----                     ----------            ----------               
-*    1 54    WS-C2960X-48LPS-L         15.2(7)E2             C2960X-UNIVERSALK9-M     
+*    1 52    WS-C2960X-48LPS-L         15.2(4)E              C2960X-UNIVERSALK9-M     
 
 
 Configuration register is 0xF
@@ -127,7 +97,7 @@ Switch#
 Switch#show env all
 FAN is OK
 SYSTEM TEMPERATURE is OK
-System Temperature Value: 24 Degree Celsius
+System Temperature Value: 25 Degree Celsius
 System Temperature State: GREEN
 Yellow Threshold : 58 Degree Celsius
 Red Threshold    : 68 Degree Celsius
