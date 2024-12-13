@@ -8,6 +8,9 @@ from netmiko import ConnectHandler
 BAUD_RATE = 9600       # Standard baud rate for Cisco devices
 LOG_DIR = os.path.join(os.path.expanduser("~"), "Desktop", "CiscoLogs")
 
+IP_ADDR = "192.168.1.150/255.255.255.0"
+DEFAULT_ROUTER = "192.168.1.1"
+TFTP_ADDR = "192.168.1.110"
 def list_com_ports():
     """
     List all available COM ports and let the user select one.
@@ -106,7 +109,7 @@ def rommon_reset():
     raise Exception(f"Failed to find RETURN.")
 
 def copy_ios():
-  send_command(b"copy tftp://192.168.1.110/c2960x-universalk9-mz.152-4.E.bin flash:c2960x-universalk9-mz.152-4.E.bin\r")
+  send_command(f"copy tftp://{TFTP_ADDR}/c2960x-universalk9-mz.152-4.E.bin flash:c2960x-universalk9-mz.152-4.E.bin\r".encode())
   #Need to work on checking prompt later, 20 mins TO
   found, output = wait_for_prompt("switch:", timeout=1200)
   if not found:
@@ -120,8 +123,8 @@ def rommon_mode():
   send_command(b"flash\r", delay=5)
   found, output = write_and_wait(b"\r", "switch:", timeout=500)
   if found:
-    send_command(b"set IP_ADDR 192.168.1.156/255.255.255.0\r")
-    send_command(b"set DEFAULT_ROUTER 192.168.1.1\r")
+    send_command(f"set IP_ADDR {IP_ADDR}\r".encode())
+    send_command(f"set DEFAULT_ROUTER {DEFAULT_ROUTER}\r".encode())
     send_command(b"set SWITCH_NUMBER 1\r")
     send_command(b"set SWITCH_PRIORITY 1\r")
     found, output = wait_for_prompt("switch:")
