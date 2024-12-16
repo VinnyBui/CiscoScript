@@ -10,3 +10,5 @@ TFTP_SERVER = "192.168.1.110"
 
 LOG_DIR = os.path.join(os.path.expanduser("~"), "Desktop", "CiscoLogs")
 DEFAULT_LOG_FILE = "session_log.txt"
+SESSION_LOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../logs")
+SESSION_LOG_FILE = os.path.join(SESSION_LOG_DIR, "session_log.txt")

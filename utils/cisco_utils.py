@@ -2,7 +2,7 @@ import time
 import serial
 import os
 import re
-from config import BAUD_RATE, LOG_DIR, DEFAULT_LOG_FILE, DEFAULT_TIMEOUT, LONG_TIMEOUT, DELETE_TIMEOUT
+from config.config import BAUD_RATE, LOG_DIR, DEFAULT_LOG_FILE, DEFAULT_TIMEOUT, LONG_TIMEOUT, DELETE_TIMEOUT, SESSION_LOG_FILE
 
 def list_com_ports():
     """Lists available COM ports and allows user selection."""
@@ -163,7 +163,7 @@ def connect_netmiko(serial_port, baud_rate=BAUD_RATE, session_log=DEFAULT_LOG_FI
     },
     "global_delay_factor": global_delay_factor,
     "fast_cli": False,
-    "session_log": session_log,
+    "session_log": SESSION_LOG_FILE,
     "read_timeout_override": 30,
   }
 
