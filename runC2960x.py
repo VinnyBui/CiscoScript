@@ -101,7 +101,7 @@ def rommon_reset():
 
     time.sleep(1) 
     send_command(b"n\r")
-    #Entering # mode
+    #Entering > mode
     found, output = wait_for_prompt("Switch>\r")
     if found:
       send_command(b"en\r")
