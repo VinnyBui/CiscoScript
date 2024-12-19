@@ -2,7 +2,7 @@ import time
 import serial
 import os
 import re
-from config.config import BAUD_RATE, LOG_DIR, DEFAULT_LOG_FILE, DEFAULT_TIMEOUT, LONG_TIMEOUT, DELETE_TIMEOUT, SESSION_LOG_FILE
+from config.config import BAUD_RATE, LOG_DIR, DEFAULT_TIMEOUT, LONG_TIMEOUT, DELETE_TIMEOUT, SESSION_LOG_FILE
 
 def list_com_ports():
     """Lists available COM ports and allows user selection."""
@@ -23,7 +23,7 @@ def list_com_ports():
         except ValueError:
             print("Invalid input. Please enter a number.")
 
-def configure_serial(port, baud_rate=BAUD_RATE):
+def configure_serial(port, baud_rate=9600):
   """Configures and returns a serial connection."""
   try:
     return serial.Serial(
@@ -148,7 +148,7 @@ def close_pyserial(ser):
     print("PySerial connection closed.")
   time.sleep(2)  # Allow time for the OS to release the port
 
-def connect_netmiko(serial_port, baud_rate=BAUD_RATE, session_log=DEFAULT_LOG_FILE, global_delay_factor=2):
+def connect_netmiko(serial_port, baud_rate=9600):
   """Connect to a Cisco device using Netmiko over serial."""
   from netmiko import ConnectHandler
 
@@ -161,7 +161,7 @@ def connect_netmiko(serial_port, baud_rate=BAUD_RATE, session_log=DEFAULT_LOG_FI
       "parity": "N",
       "stopbits": 1,
     },
-    "global_delay_factor": global_delay_factor,
+    "global_delay_factor": 2,
     "fast_cli": False,
     "session_log": SESSION_LOG_FILE,
     "read_timeout_override": 30,
