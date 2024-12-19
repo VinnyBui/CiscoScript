@@ -1,9 +1,15 @@
 import serial
 import time
 import os
+import platform
+
+# Determine the correct serial port based on the operating system
+if platform.system() == "Windows":
+    SERIAL_PORT = 'COM1'  # Default port for Windows
+else:
+    SERIAL_PORT = '/dev/ttyS0'  # Default port for Linux
 
 # Configuration for serial connection
-SERIAL_PORT = 'COM1'  # Replace with your COM port
 BAUD_RATE = 9600       # Standard baud rate for Cisco devices
 LOG_DIR = os.path.join(os.path.expanduser("~"), "Desktop", "CiscoLogs")  # Log directory on Desktop
 
