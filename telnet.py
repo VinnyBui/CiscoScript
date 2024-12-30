@@ -23,9 +23,10 @@ try:
     output = connection.send_command_timing("telnet l0")
     print("Telnet to L0 initiated:")
     print(output)
-    
-    # Close connection
-    connection.disconnect()
 
 except Exception as e:
     print(f"An error occurred: {e}")
+
+finally:
+    # Close connection
+    connection.disconnect()
