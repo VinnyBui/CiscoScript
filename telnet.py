@@ -28,5 +28,7 @@ except Exception as e:
     print(f"An error occurred: {e}")
 
 finally:
-    # Close connection
-    connection.disconnect()
+    # Close connection if established
+    if connection:
+        connection.disconnect()
+        print("Connection to TermG closed.")
