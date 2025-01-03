@@ -2,6 +2,7 @@ import time
 import serial
 import os
 import re
+import logging
 from config.config import BAUD_RATE, LOG_DIR, DEFAULT_TIMEOUT, LONG_TIMEOUT, DELETE_TIMEOUT, SESSION_LOG_FILE
 
 def list_com_ports():
@@ -194,7 +195,7 @@ def test_log(net_connect, commands, log_dir=LOG_DIR, default_filename="device_lo
     with open(log_path, "w") as log_file:
       for cmd in commands:
         log_file.write(f"\n{cmd}\n")
-        output = net_connect.send_command(cmd)
+        output = net_connect.send_command_timing(cmd, delay_factor=5)
         log_file.write(output + "\n")
         print(output)
   except Exception as e:

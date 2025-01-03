@@ -1,3 +1,5 @@
+import os
+
 BAUD_RATE = 9600
 
 DEFAULT_TIMEOUT = 300
