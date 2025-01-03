@@ -22,22 +22,28 @@ try:
 
     # Telnet to L0
     output = connection.send_command_timing("telnet l1")
-    print("Telnet to L0 initiated:")
+    print("Telnet to L1 initiated:")
     print(output)
 
     # Check for specific error message
     if "% Connection refused by remote host" in output:
-        print("Failed to connect to L0: Connection refused by remote host. Exiting program.")
+        print("Failed to connect to L: Connection refused by remote host. Exiting program.")
+        connection.disconnect()
         exit(1)
 
+    # Capture the current prompt
+    current_prompt = connection.find_prompt()
+    print(f"Current prompt: {current_prompt}")
+
     while True:
-        user_input = input("Switch> ").strip() or input("Switch# ").strip() or input("Switch: ").strip()
+        current_prompt = connection.find_prompt()
+        user_input = input(current_prompt).strip()
 
         if user_input.lower() == "exit":
             print("Program is ending..")
             break
         elif user_input.startswith("runP "):
-            script_name = user_input[5:].strip()  
+            script_name = user_input[5:].strip()
             script_path = os.path.join("scripts", script_name)
 
             if os.path.exists(script_path):
@@ -46,21 +52,24 @@ try:
                     spec = importlib.util.spec_from_file_location(script_name, script_path)
                     module = importlib.util.module_from_spec(spec)
                     spec.loader.exec_module(module)
-                    
+
                     # Run the script's `run` function
                     if hasattr(module, "run"):
                         module.run(connection)
+                        # Update prompt after script execution
+                        current_prompt = connection.find_prompt()
                     else:
                         print(f"Script '{script_name}' does not have a 'run' function.")
-
                 except Exception as e:
                     print(f"Failed to run script: {e}")
             else:
                 print(f"Script '{script_name}' not found in the 'scripts' folder.")
         else:
             try:
-                output = connection.send_command_timing(user_input)
+                # Send command and update prompt dynamically
+                output = connection.send_command_timing(user_input, delay_factor=1)
                 print(output)
+                current_prompt = connection.find_prompt()
             except Exception as e:
                 print(f"Error executing command: {e}")
 
