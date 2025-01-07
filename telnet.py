@@ -21,8 +21,8 @@ try:
     print("Connection established to TermG.")
 
     # Telnet to L0
-    output = connection.send_command_timing("telnet l3")
-    print("Telnet to L3 initiated:")
+    output = connection.send_command_timing("telnet l0")
+    print("Telnet to L1 initiated:")
     print(output)
 
     # Check for specific error message
@@ -39,7 +39,7 @@ try:
         current_prompt = connection.find_prompt()
         user_input = input(current_prompt).strip()
 
-        if user_input.lower() == "exit":
+        if user_input.lower() == "exitP":
             print("Program is ending..")
             break
         elif user_input.startswith("runP "):
