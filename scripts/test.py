@@ -20,19 +20,30 @@ test_commands = [
     "show license",
 ]
 
-def rommon_reset(connection, prompt):
-    if "RETURN" in prompt:
-        output = connection.send_command_timing("\r\n")
-        if "initial configuration dialog?" in output:
-            output = connection.send_command("n", expect_string="Switch>")
-            print(output)
-            output = connection.send_command("enable", expect_string="Switch#")
-            print(output)
+def rommon_reset(connection, prompt, wait_time=600):
+    import time
+    # Check initial prompt
+    start_time = time.time()
+    while "RETURN" not in prompt:
+        if time.time() - start_time > wait_time:
+            raise Exception("Timeout waiting for 'RETURN' prompt.")
+        
+        # Send an empty command to get updated output
+        prompt = connection.send_command_timing("\r\n")
+        print(prompt)
+        time.sleep(5)  # Wait for a short interval before retrying
+
+    # Handle 'initial configuration dialog' if detected
+    if "initial configuration dialog?" in prompt:
+        output = connection.send_command("n", expect_string="Switch>")
+        print(output)
+        output = connection.send_command("enable", expect_string="Switch#")
+        print(output)
     else:
-        raise Exception(f"Failed to find RETURN.")
+        raise Exception("Unexpected prompt after waiting for 'RETURN'.")
 
 def rommon_mode(connection):
-    output = connection.send_command("flash", expect_string="switch:", delay_factor=5)
+    output = connection.send_command_timing("flash")
     print(output)
     if "switch:" in output:
         connection.send_command("set SWITCH_NUMBER 1", expect_string="switch:")
@@ -54,9 +65,9 @@ def rommon_mode(connection):
 def boot_ios(connection):
     output = connection.send_command_timing("conf t")
     print(output)
-    output = connection.send_command_timing("boot system flash:/c2960x-universalk9-mz.152-4.E.bin")
+    output = connection.send_command_timing("boot system flash:/c2960x-universalk9-mz.152-4.E.bin", delay_factor=5)
     print(output)
-    if "Switch(config)#" in output:
+    if "Switch(config)" in output:
         output = connection.send_command_timing("int fa0")
         print(output)
         output = connection.send_command_timing("ip add dhcp")
@@ -73,14 +84,6 @@ def boot_ios(connection):
             if "Do you want to over write?" in output:
                 output = connection.send_command_timing("y", delay_factor=5)
                 print("Overwrite confirmation output:", output)
-            if "Loading" in output or "!" in output:
-                print("TFTP transfer in progress...")
-            # Wait for completion
-            if "Copy complete" in output or "bytes copied" in output:
-                print("TFTP copy completed successfully.")
-            else:
-                raise Exception("TFTP transfer did not complete successfully.")
-            
             # Proceed with reload
             output = connection.send_command_timing("reload")
             print("Reload command output:", output)
@@ -98,7 +101,7 @@ def run_diagnostic(connection):
     output = connection.send_command_timing("diagnostic start switch 1 test all")
     print(output)
     if "Do you want to continue?" in output:
-        output = connection.send_command_timing("y")
+        output = connection.send_command_timing("yes")
         print(output)
         rommon_reset(connection, output)
         
@@ -107,8 +110,8 @@ def run(connection):
         # rommon_mode(connection)
         boot_ios(connection)
         run_diagnostic(connection)
-        # output = connection.send_command("terminal length 0", expect_string="Switch#")
-        # print(output)
-        # test_log(connection, test_commands)
+        output = connection.send_command("terminal length 0", expect_string="Switch#")
+        print(output)
+        test_log(connection, test_commands)
     except Exception as e:
         print(f"Error running test command: {e}")
