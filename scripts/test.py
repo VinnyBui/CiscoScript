@@ -46,12 +46,14 @@ def rommon_mode(connection):
     output = connection.send_command_timing("flash", delay_factor=5)
     print(output)
     if "switch:" in output:
-        connection.send_command("set SWITCH_NUMBER 1", expect_string="switch:")
-        connection.send_command("set SWITCH_PRIORITY 1", expect_string="switch:")
+        output = connection.send_command_timing("set SWITCH_NUMBER 1", delay_factor=1)
+        print(output)
+        ouput = connection.send_command_timing("set SWITCH_PRIORITY 1", delay_factor=1)
+        print(output)
         output = connection.send_command_timing("delete flash:config.text")
         print(output)
         if "Are you sure" in output:
-            output = connection.send_command("y", expect_string="switch:")
+            output = connection.send_command_timing("y")
             print(output)
             output = connection.send_command_timing("reset")
             print(output)
@@ -97,7 +99,6 @@ def boot_ios(connection):
                 elif "bytes copied" in output:
                     print("Copy process completed.")
                     break
-
                 # Continuously check output
                 output = connection.send_command_timing("\n")  # Press Enter to check progress
                 print("Checking progress output:", output)

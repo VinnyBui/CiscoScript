@@ -21,8 +21,8 @@ try:
     print("Connection established to TermG.")
 
     # Telnet to L0
-    output = connection.send_command_timing("telnet L0")
-    print("Telnet to L0 initiated:")
+    output = connection.send_command_timing("telnet L5")
+    print("Telnet to L5 initiated:")
     print(output)
 
     # Check for specific error message
