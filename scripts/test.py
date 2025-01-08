@@ -43,7 +43,7 @@ def rommon_reset(connection, prompt, wait_time=600):
         raise Exception("Unexpected prompt after waiting for 'RETURN'.")
 
 def rommon_mode(connection):
-    output = connection.send_command_timing("flash")
+    output = connection.send_command_timing("flash", delay_factor=5)
     print(output)
     if "switch:" in output:
         connection.send_command("set SWITCH_NUMBER 1", expect_string="switch:")
@@ -65,7 +65,7 @@ def rommon_mode(connection):
 def boot_ios(connection):
     output = connection.send_command_timing("conf t")
     print(output)
-    output = connection.send_command_timing("boot system flash:/c2960x-universalk9-mz.152-4.E.bin", delay_factor=5)
+    output = connection.send_command_timing("boot system flash:/c2960x-universalk9-mz.152-4.E.bin", delay_factor=2)
     print(output)
     if "Switch(config)" in output:
         output = connection.send_command_timing("int fa0")
@@ -79,11 +79,14 @@ def boot_ios(connection):
         output = connection.send_command_timing("copy tftp://192.168.1.107/c2960x-universalk9-mz.152-4.E.bin flash:/c2960x-universalk9-mz.152-4.E.bin")
         print(output)
         if "Destination filename" in output:
-            output = connection.send_command_timing("\n", delay_factor=5)
+            output = connection.send_command_timing("\n", delay_factor=1)
             print("Confirmation output:", output)
+
             if "Do you want to over write?" in output:
                 output = connection.send_command_timing("y", delay_factor=5)
                 print("Overwrite confirmation output:", output)
+
+
             # Proceed with reload
             output = connection.send_command_timing("reload")
             print("Reload command output:", output)
