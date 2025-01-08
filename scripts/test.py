@@ -91,6 +91,9 @@ def boot_ios(connection):
                 if "(Socket error)" in output:
                     raise Exception("TFTP transfer failed due to socket error.")
                     break
+                elif "[Timed out]" in output:
+                    raise Exception("TFTP transfer failed due to timeout.")
+                    break
                 elif "bytes copied" in output:
                     print("Copy process completed.")
                     break
@@ -107,7 +110,6 @@ def boot_ios(connection):
                 output = connection.send_command_timing("no")
                 print("Configuration save prompt handled.")
                 rommon_reset(connection, output)
-
         else:
             raise Exception("Failed to initiate TFTP transfer!")
     else:
@@ -123,7 +125,7 @@ def run_diagnostic(connection):
         
 def run(connection):
     try:
-        # rommon_mode(connection)
+        rommon_mode(connection)
         boot_ios(connection)
         run_diagnostic(connection)
         output = connection.send_command("terminal length 0", expect_string="Switch#")
