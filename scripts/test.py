@@ -79,13 +79,25 @@ def boot_ios(connection):
         output = connection.send_command_timing("copy tftp://192.168.1.107/c2960x-universalk9-mz.152-4.E.bin flash:/c2960x-universalk9-mz.152-4.E.bin")
         print(output)
         if "Destination filename" in output:
+            # Send the command to start the process
             output = connection.send_command_timing("\n", delay_factor=1)
             print("Confirmation output:", output)
 
-            if "Do you want to over write?" in output:
-                output = connection.send_command_timing("y", delay_factor=5)
-                print("Overwrite confirmation output:", output)
+            while True:
+                if "Do you want to overwrite?" in output:
+                    output = connection.send_command_timing("y", delay_factor=5)
+                    print("Overwrite confirmation output:", output)
+                
+                if "(Socket error)" in output:
+                    raise Exception("TFTP transfer failed due to socket error.")
+                    break
+                elif "bytes copied" in output:
+                    print("Copy process completed.")
+                    break
 
+                # Continuously check output
+                output = connection.send_command_timing("\n")  # Press Enter to check progress
+                print("Checking progress output:", output)
 
             # Proceed with reload
             output = connection.send_command_timing("reload")
@@ -95,6 +107,7 @@ def boot_ios(connection):
                 output = connection.send_command_timing("no")
                 print("Configuration save prompt handled.")
                 rommon_reset(connection, output)
+
         else:
             raise Exception("Failed to initiate TFTP transfer!")
     else:
