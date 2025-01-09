@@ -1,6 +1,6 @@
 import sys
 import os
-
+import time
 # Import the function from utils.cisco_utils
 from utils.cisco_utils import test_log, wait_for_prompt
 
@@ -45,24 +45,28 @@ def rommon_reset(connection, prompt, wait_time=600):
 def rommon_mode(connection):
     output = connection.send_command_timing("flash", delay_factor=5)
     print(output)
-    if "switch:" in output:
-        output = connection.send_command_timing("set SWITCH_NUMBER 1", delay_factor=1)
+    while "switch:" not in output:
+        output += connection.send_command_timing(" ", delay_factor=1)
         print(output)
-        ouput = connection.send_command_timing("set SWITCH_PRIORITY 1", delay_factor=1)
+    #DELAY
+    time.sleep(1) 
+    output = connection.send_command_timing("set SWITCH_NUMBER 1", delay_factor=1)
+    print(output)
+    #DELAY
+    time.sleep(1) 
+    output = connection.send_command_timing("set SWITCH_PRIORITY 1", delay_factor=1)
+    print(output)
+    output = connection.send_command_timing("delete flash:config.text")
+    print(output)
+    if "Are you sure" in output:
+        output = connection.send_command_timing("y")
         print(output)
-        output = connection.send_command_timing("delete flash:config.text")
+        output = connection.send_command_timing("reset")
         print(output)
-        if "Are you sure" in output:
-            output = connection.send_command_timing("y")
-            print(output)
-            output = connection.send_command_timing("reset")
-            print(output)
-            output = connection.send_command_timing("y")
-            rommon_reset(connection, output)
-        else:
-            raise Exception(f"Failed to delete")
+        output = connection.send_command_timing("y")
+        rommon_reset(connection, output)
     else:
-        raise Exception(f"Flash initialization failed.")
+        raise Exception(f"Failed to delete")
 
 def boot_ios(connection):
     output = connection.send_command_timing("conf t")
@@ -78,7 +82,7 @@ def boot_ios(connection):
         print(output)
         output = connection.send_command_timing("end")
         print(output)
-        output = connection.send_command_timing("copy tftp://192.168.1.107/c2960x-universalk9-mz.152-4.E.bin flash:/c2960x-universalk9-mz.152-4.E.bin")
+        output = connection.send_command_timing("copy tftp://192.168.1.107/c2960x-universalk9-mz.152-4.E.bin flash:/c2960x-universalk9-mz.152-4.E.bin",  delay_factor=3)
         print(output)
         if "Destination filename" in output:
             # Send the command to start the process
@@ -87,7 +91,7 @@ def boot_ios(connection):
 
             while True:
                 if "Do you want to overwrite?" in output:
-                    output = connection.send_command_timing("y", delay_factor=5)
+                    output = connection.send_command_timing("y", delay_factor=3)
                     print("Overwrite confirmation output:", output)
                 
                 if "(Socket error)" in output:
@@ -123,7 +127,7 @@ def run_diagnostic(connection):
         output = connection.send_command_timing("yes")
         print(output)
         rommon_reset(connection, output)
-        
+
 def run(connection):
     try:
         rommon_mode(connection)
