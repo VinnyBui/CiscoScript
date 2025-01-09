@@ -46,15 +46,15 @@ def rommon_mode(connection):
     output = connection.send_command_timing("flash", delay_factor=5)
     print(output)
     while "switch:" not in output:
-        output += connection.send_command_timing(" ", delay_factor=1)
+        output += connection.send_command_timing("\n", delay_factor=1)
         print(output)
     #DELAY
     time.sleep(1) 
-    output = connection.send_command_timing("set SWITCH_NUMBER 1", delay_factor=1)
+    output = connection.send_command_timing("set SWITCH_NUMBER 1")
     print(output)
     #DELAY
-    time.sleep(1) 
-    output = connection.send_command_timing("set SWITCH_PRIORITY 1", delay_factor=1)
+    time.sleep(3) 
+    output = connection.send_command_timing("set SWITCH_PRIORITY 1", delay_factor=3)
     print(output)
     output = connection.send_command_timing("delete flash:config.text")
     print(output)
@@ -82,9 +82,11 @@ def boot_ios(connection):
         print(output)
         output = connection.send_command_timing("end")
         print(output)
-        output = connection.send_command_timing("copy tftp://192.168.1.107/c2960x-universalk9-mz.152-4.E.bin flash:/c2960x-universalk9-mz.152-4.E.bin",  delay_factor=3)
+
+        output = connection.send_command_timing("copy tftp://192.168.1.107/c2960x-universalk9-mz.152-4.E.bin flash:/c2960x-universalk9-mz.152-4.E.bin",  delay_factor=5)
         print(output)
-        if "Destination filename" in output:
+        time.sleep(5) 
+        if "Destination filename" in output or "Loading" in output:
             # Send the command to start the process
             output = connection.send_command_timing("\n", delay_factor=1)
             print("Confirmation output:", output)
