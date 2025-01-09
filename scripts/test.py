@@ -48,13 +48,12 @@ def rommon_mode(connection):
     while "switch:" not in output:
         output += connection.send_command_timing("\n", delay_factor=1)
         print(output)
-    #DELAY
-    time.sleep(1) 
-    output = connection.send_command_timing("set SWITCH_NUMBER 1")
+    
+    connection.send_command_timing("\n", delay_factor=1)
+    output = connection.send_command_timing("set SWITCH_NUMBER 1", delay_factor=5)
     print(output)
-    #DELAY
-    time.sleep(3) 
-    output = connection.send_command_timing("set SWITCH_PRIORITY 1", delay_factor=3)
+    connection.send_command_timing("\n", delay_factor=1)
+    output = connection.send_command_timing("set SWITCH_PRIORITY 1", delay_factor=5)
     print(output)
     output = connection.send_command_timing("delete flash:config.text")
     print(output)
@@ -68,6 +67,7 @@ def rommon_mode(connection):
     else:
         raise Exception(f"Failed to delete")
 
+#NEED TO CLEAN THIS UP
 def boot_ios(connection):
     output = connection.send_command_timing("conf t")
     print(output)
@@ -82,41 +82,46 @@ def boot_ios(connection):
         print(output)
         output = connection.send_command_timing("end")
         print(output)
-
+        # Start TFTP transfer
         output = connection.send_command_timing("copy tftp://192.168.1.107/c2960x-universalk9-mz.152-4.E.bin flash:/c2960x-universalk9-mz.152-4.E.bin",  delay_factor=5)
-        print(output)
-        time.sleep(5) 
-        if "Destination filename" in output or "Loading" in output:
-            # Send the command to start the process
-            output = connection.send_command_timing("\n", delay_factor=1)
-            print("Confirmation output:", output)
+        print("Initial Copy Command Output:", output)
 
-            while True:
-                if "Do you want to overwrite?" in output:
-                    output = connection.send_command_timing("y", delay_factor=3)
-                    print("Overwrite confirmation output:", output)
-                
-                if "(Socket error)" in output:
-                    raise Exception("TFTP transfer failed due to socket error.")
-                    break
-                elif "[Timed out]" in output:
-                    raise Exception("TFTP transfer failed due to timeout.")
-                    break
-                elif "bytes copied" in output:
-                    print("Copy process completed.")
-                    break
-                # Continuously check output
-                output = connection.send_command_timing("\n")  # Press Enter to check progress
-                print("Checking progress output:", output)
+        start_time = time.time()
+        while time.time() - start_time < 20:
+            # Fetch updated output
+            output += connection.send_command_timing("\n", delay_factor=2)
+            print("Progress Output:", output)
+            if "Destination filename" in output or "Loading" in output:
+                print("TFTP process initiated successfully.")
+                break
 
-            # Proceed with reload
-            output = connection.send_command_timing("reload")
-            print("Reload command output:", output)
+        while True:
+            # Check to see if a copy already exists
+            if "Do you want to overwrite?" in output:
+                output = connection.send_command_timing("y", delay_factor=3)
+                print("Overwrite confirmation output:", output)
+            
+            if "(Socket error)" in output:
+                raise Exception("TFTP transfer failed due to socket error.")
+                break
+            elif "(Connection timed out)" in output:
+                raise Exception("TFTP transfer failed due to timeout.")
+                break
+            elif "bytes copied" in output:
+                print("Copy process completed.")
+                break
+            # Continuously check output
+            output = connection.send_command_timing("\n")
+            print("Checking progress output:", output)
 
-            if "System configuration has been modified. Save? [yes/no]:" in output:
-                output = connection.send_command_timing("no")
-                print("Configuration save prompt handled.")
-                rommon_reset(connection, output)
+        # Proceed with reload
+        output = connection.send_command_timing("reload")
+        print("Reload command output:", output)
+
+        if "System configuration has been modified. Save? [yes/no]:" in output:
+            output = connection.send_command_timing("no")
+            print("Configuration save prompt handled.")
+            rommon_reset(connection, output)
         else:
             raise Exception("Failed to initiate TFTP transfer!")
     else:
