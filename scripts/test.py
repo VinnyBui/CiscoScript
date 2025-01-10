@@ -107,6 +107,9 @@ def boot_ios(connection):
             elif "(Connection timed out)" in output:
                 raise Exception("TFTP transfer failed due to timeout.")
                 break
+            elif "Error opening" in output:
+                raise Exception("TFTP transfer failed")
+                break
             elif "bytes copied" in output:
                 print("Copy process completed.")
                 break
@@ -137,7 +140,7 @@ def run_diagnostic(connection):
 
 def run(connection):
     try:
-        rommon_mode(connection)
+        # rommon_mode(connection)
         boot_ios(connection)
         run_diagnostic(connection)
         output = connection.send_command("terminal length 0", expect_string="Switch#")
