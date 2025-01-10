@@ -140,7 +140,7 @@ def run_diagnostic(connection):
 
 def run(connection):
     try:
-        # rommon_mode(connection)
+        rommon_mode(connection)
         boot_ios(connection)
         run_diagnostic(connection)
         output = connection.send_command("terminal length 0", expect_string="Switch#")

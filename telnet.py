@@ -4,17 +4,14 @@ import os
 import importlib.util
 
 session_log_path = os.path.join("logs", "telnet_log.txt")
-
 # Enable debugging to capture session output
 logging.basicConfig(level=logging.INFO)
-
 # Device connection details
 device = {
     "device_type": "cisco_ios_telnet",
     "ip": "192.168.1.250",
     "timeout": 60,
 }
-
 try:
     # Establish connection to TermG
     connection = ConnectHandler(**device, session_log=session_log_path)
