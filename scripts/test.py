@@ -11,7 +11,6 @@ sys.path.append(parent_dir)
 IP_ADDR = "192.168.1.130/255.255.255.0"
 DEFAULT_ROUTER = "192.168.1.1"
 TFTP_ADDR = "192.168.1.107"
-
 test_commands = [
     "show diagn result swi 1",
     "show version",
@@ -41,7 +40,6 @@ def rommon_reset(connection, prompt, wait_time=600):
         print(output)
     else:
         raise Exception("Unexpected prompt after waiting for 'RETURN'.")
-
 def rommon_mode(connection):
     output = connection.send_command_timing("flash", delay_factor=5)
     print(output)
@@ -66,7 +64,6 @@ def rommon_mode(connection):
         rommon_reset(connection, output)
     else:
         raise Exception(f"Failed to delete")
-
 #NEED TO CLEAN THIS UP
 def boot_ios(connection):
     output = connection.send_command_timing("conf t")
@@ -85,7 +82,6 @@ def boot_ios(connection):
         # Start TFTP transfer
         output = connection.send_command_timing("copy tftp://192.168.1.107/c2960x-universalk9-mz.152-4.E.bin flash:/c2960x-universalk9-mz.152-4.E.bin",  delay_factor=5)
         print("Initial Copy Command Output:", output)
-
         start_time = time.time()
         while time.time() - start_time < 20:
             # Fetch updated output
@@ -94,13 +90,11 @@ def boot_ios(connection):
             if "Destination filename" in output or "Loading" in output:
                 print("TFTP process initiated successfully.")
                 break
-
         while True:
-            # Check to see if a copy already exists
+            # Check to see errors
             if "Do you want to overwrite?" in output:
                 output = connection.send_command_timing("y", delay_factor=3)
                 print("Overwrite confirmation output:", output)
-            
             if "(Socket error)" in output:
                 raise Exception("TFTP transfer failed due to socket error.")
                 break
@@ -116,11 +110,9 @@ def boot_ios(connection):
             # Continuously check output
             output = connection.send_command_timing("\n")
             print("Checking progress output:", output)
-
         # Proceed with reload
         output = connection.send_command_timing("reload")
         print("Reload command output:", output)
-
         if "System configuration has been modified. Save? [yes/no]:" in output:
             output = connection.send_command_timing("no")
             print("Configuration save prompt handled.")
@@ -129,7 +121,6 @@ def boot_ios(connection):
             raise Exception("Failed to initiate TFTP transfer!")
     else:
         raise Exception(f"Failed to boot system.")
-
 def run_diagnostic(connection):
     output = connection.send_command_timing("diagnostic start switch 1 test all")
     print(output)
@@ -137,14 +128,13 @@ def run_diagnostic(connection):
         output = connection.send_command_timing("yes")
         print(output)
         rommon_reset(connection, output)
-
-def run(connection):
+def run(connection, line_to_use):
     try:
         rommon_mode(connection)
         boot_ios(connection)
         run_diagnostic(connection)
         output = connection.send_command("terminal length 0", expect_string="Switch#")
         print(output)
-        test_log(connection, test_commands)
+        test_log(connection, test_commands, default_filename=line_to_use)
     except Exception as e:
         print(f"Error running test command: {e}")

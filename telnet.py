@@ -34,28 +34,24 @@ try:
     # Capture the current prompt
     current_prompt = connection.find_prompt()
     print(f"Current prompt: {current_prompt}")
-
     while True:
         current_prompt = connection.find_prompt()
         user_input = input(current_prompt).strip()
-
         if user_input.lower() == "exit":
             print("Program is ending..")
             break
         elif user_input.startswith("runP "):
             script_name = user_input[5:].strip()
             script_path = os.path.join("scripts", script_name)
-
             if os.path.exists(script_path):
                 try:
                     # Dynamically load the script
                     spec = importlib.util.spec_from_file_location(script_name, script_path)
                     module = importlib.util.module_from_spec(spec)
                     spec.loader.exec_module(module)
-
                     # Run the script's `run` function
                     if hasattr(module, "run"):
-                        module.run(connection)
+                        module.run(connection, line_to_use)
                         # Update prompt after script execution
                         current_prompt = connection.find_prompt()
                     else:
@@ -72,12 +68,11 @@ try:
                 current_prompt = connection.find_prompt()
             except Exception as e:
                 print(f"Error executing command: {e}")
-
 except Exception as e:
     print(f"An error occurred: {e}")
-
 finally:
     # Close connection if established
     if 'connection' in locals():
         connection.disconnect()
+        print(f"Line {line_to_use} disconnected.")
         print("Connection to TermG closed.")
