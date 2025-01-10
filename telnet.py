@@ -13,21 +13,24 @@ device = {
     "timeout": 60,
 }
 try:
-    # Establish connection to TermG
+    line_to_use = input("Enter the line you want to use (L0, L1, L2, L3, L4, L5, L6, L7): ").strip()
+    # Validate input
+    valid_lines = [f"L{i}" for i in range(8)]
+    if line_to_use not in valid_lines:
+        print(f"Invalid line selection. Please choose from: {', '.join(valid_lines)}")
+        exit()
     connection = ConnectHandler(**device, session_log=session_log_path)
     print("Connection established to TermG.")
-
-    # Telnet to L0
-    output = connection.send_command_timing("telnet L7")
-    print("Telnet to L7 initiated:")
+    # Send telnet command with the selected line
+    command = f"telnet {line_to_use}"
+    output = connection.send_command_timing(command)
+    print(f"Telnet to {line_to_use} initiated:")
     print(output)
-
     # Check for specific error message
     if "% Connection refused by remote host" in output:
         print("Failed to connect to L: Connection refused by remote host. Exiting program.")
         connection.disconnect()
         exit(1)
-
     # Capture the current prompt
     current_prompt = connection.find_prompt()
     print(f"Current prompt: {current_prompt}")
