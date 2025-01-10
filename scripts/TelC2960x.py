@@ -95,8 +95,11 @@ def boot_ios(connection):
             if "Do you want to overwrite?" in output:
                 output = connection.send_command_timing("y", delay_factor=3)
                 print("Overwrite confirmation output:", output)
-            if "(Socket error)" in output:
+            elif "(Socket error)" in output:
                 raise Exception("TFTP transfer failed due to socket error.")
+                break
+            elif "(No space left on device)" in output:
+                raise Exception("No space left on device.")
                 break
             elif "(Connection timed out)" in output:
                 raise Exception("TFTP transfer failed due to timeout.")
