@@ -3,7 +3,7 @@ import logging
 import os
 import importlib.util
 
-session_log_path = os.path.join("logs", "telnet_log.txt")
+session_log_path = os.path.abspath(os.path.join("..", "logs", "telnet_log.txt"))
 # Enable debugging to capture session output
 logging.basicConfig(level=logging.INFO)
 # Device connection details
@@ -42,7 +42,10 @@ try:
             break
         elif user_input.startswith("runP "):
             script_name = user_input[5:].strip()
-            script_path = os.path.join("telnet_scripts", script_name)
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            project_root = os.path.abspath(os.path.join(script_dir, ".."))
+            script_path = os.path.join(project_root, "telnet_scripts", script_name)
+
             if os.path.exists(script_path):
                 try:
                     # Dynamically load the script
@@ -59,7 +62,7 @@ try:
                 except Exception as e:
                     print(f"Failed to run script: {e}")
             else:
-                print(f"Script '{script_name}' not found in the 'scripts' folder.")
+                print(f"Script '{script_name}' not found in the 'telnet_scripts' folder.")
         else:
             try:
                 # Send command and update prompt dynamically

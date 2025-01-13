@@ -1,12 +1,13 @@
 import sys
 import os
 import time
+# Add the parent directory of telnet_scripts to sys.path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.abspath(os.path.join(current_dir, ".."))
+if parent_dir not in sys.path:
+    sys.path.append(parent_dir)
 # Import the function from utils.cisco_utils
 from utils.cisco_utils import test_log, wait_for_prompt
-
-# Add the parent directory to sys.path
-parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(parent_dir)
 
 IP_ADDR = "192.168.1.130/255.255.255.0"
 DEFAULT_ROUTER = "192.168.1.1"
