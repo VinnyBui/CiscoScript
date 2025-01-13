@@ -42,7 +42,7 @@ try:
             break
         elif user_input.startswith("runP "):
             script_name = user_input[5:].strip()
-            script_path = os.path.join("scripts", script_name)
+            script_path = os.path.join("telnet_scripts", script_name)
             if os.path.exists(script_path):
                 try:
                     # Dynamically load the script
