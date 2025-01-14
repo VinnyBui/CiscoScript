@@ -9,14 +9,14 @@ if parent_dir not in sys.path:
 # Import the function from utils.cisco_utils
 from utils.cisco_utils import test_log, wait_for_prompt
 test_commands = [
-  "show diagnostic result swi all",
-  "show post",
-  "show version",
-  "show env all",
-  "show inventory",
+    "show diagnostic result swi all",
+    "show post",
+    "show version",
+    "show env all",
+    "show inventory",
 ]
 
-def rommon_reset(connection, prompt, wait_time=600):
+def rommon_reset(connection, prompt, wait_time=700):
     import time
     # Check initial prompt
     start_time = time.time()
