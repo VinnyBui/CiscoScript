@@ -70,7 +70,7 @@ def test_log(net_connect, commands, log_dir=LOG_DIR, default_filename="device_lo
       print(f"Error during log parsing or renaming: {e}")
 def run(connection, line_to_use):
   try:
-      # init(connection)
+      init(connection)
       output = connection.send_command("terminal length 0", expect_string="Router#")
       print(output)
       test_log(connection, test_commands, default_filename=line_to_use)
