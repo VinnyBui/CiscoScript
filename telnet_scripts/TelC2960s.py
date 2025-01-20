@@ -27,8 +27,8 @@ def rommon_reset(connection, prompt, wait_time=700):
         # Send an empty command to get updated output
         prompt = connection.send_command_timing("\r\n")
         print(prompt)
-        time.sleep(5)  # Wait for a short interval before retrying
-
+        time.sleep(1)
+    prompt = connection.send_command_timing("\n")
     # Handle 'initial configuration dialog' if detected
     if "initial configuration dialog?" in prompt:
         output = connection.send_command("n", expect_string="Switch>")
@@ -130,10 +130,13 @@ def run_diagnostic(connection):
 def run(connection, line_to_use):
     try:
         rommon_mode(connection)
-        boot_ios(connection)
+        # boot_ios(connection)
         run_diagnostic(connection)
         output = connection.send_command("terminal length 0", expect_string="Switch#")
         print(output)
         test_log(connection, test_commands, default_filename=line_to_use)
+        output = connection.send_command_timing("reload")
+        print(output)
+        connection.send_command_timing("\n")
     except Exception as e:
         print(f"Error running test command: {e}")

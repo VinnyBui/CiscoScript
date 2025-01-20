@@ -19,8 +19,11 @@ test_commands = [
 def init(connection):
   output = connection.send_command_timing("\n")
   if "initial configuration dialog?" in output:
-    connection.send_command_timing("n")
-    connection.send_command_timing("en")
+    output = connection.send_command_timing("n", delay_factor=5)
+    print(output)
+    connection.send_command_timing("\n", delay_factor=1)
+    output = connection.send_command_timing("en", delay_factor=5)
+    print(output)
 
 def parse_version_data(log_contents):
   """Parses device log contents for model, serial number, and software version."""
@@ -67,8 +70,8 @@ def test_log(net_connect, commands, log_dir=LOG_DIR, default_filename="device_lo
       print(f"Error during log parsing or renaming: {e}")
 def run(connection, line_to_use):
   try:
-      init(connection)
-      output = connection.send_command("terminal length 0", expect_string="Switch#")
+      # init(connection)
+      output = connection.send_command("terminal length 0", expect_string="Router#")
       print(output)
       test_log(connection, test_commands, default_filename=line_to_use)
   except Exception as e:
