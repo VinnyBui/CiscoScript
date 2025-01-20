@@ -6,4 +6,244 @@ TermG#
 TermG#telnet L0
 Trying L0 (192.168.1.250, 2002)... Open
 
-% Ple
+% Please answer 'yes' or 'no'.
+Would you like to enter the initial configuration dialog? [yes/no]: 
+% Please answer 'yes' or 'no'.
+Would you like to enter the initial configuration dialog? [yes/no]: 
+% Please answer 'yes' or 'no'.
+Would you like to enter the initial configuration dialog? [yes/no]: 
+% Please answer 'yes' or 'no'.
+Would you like to enter the initial configuration dialog? [yes/no]: 
+% Please answer 'yes' or 'no'.
+Would you like to enter the initial configuration dialog? [yes/no]: terminal length 0
+
+% Please answer 'yes' or 'no'.
+Would you like to enter the initial configuration dialog? [yes/no]: 
+% Please answer 'yes' or 'no'.
+Would you like to enter the initial configuration dialog? [yes/no]: 
+% Please answer 'yes' or 'no'.
+Would you like to enter the initial configuration dialog? [yes/no]: 
+% Please answer 'yes' or 'no'.
+Would you like to enter the initial configuration dialog? [yes/no]: 
+% Please answer 'yes' or 'no'.
+Would you like to enter the initial configuration dialog? [yes/no]: 
+% Please answer 'yes' or 'no'.
+Would you like to enter the initial configuration dialog? [yes/no]: n
+
+
+
+Press RETURN to get started!
+
+
+*Mar  1 00:00:18.299: %LINEPROTO-5-UPDOWN: Line protocol on Interface VoIP-Null0, changed state to up
+*Mar  1 00:00:18.299: %LINK-3-UPDOWN: Interface FastEthernet0/0, changed state to up
+*Mar  1 00:00:18.299: %LINK-3-UPDOWN: Interface FastEthernet0/1, changed state to up
+*Mar  1 00:00:19.787: %LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/0, changed state to down
+*Mar  1 00:00:19.787: %LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/1, changed state to down
+*Mar  1 00:21:39.043: %LINK-5-CHANGED: Interface FastEthernet0/0, changed state to administratively down
+*Mar  1 00:21:39.043: %LINK-5-CHANGED: Interface FastEthernet0/1, changed state to administratively down
+*Mar  1 00:21:39.759: %IP-5-WEBINST_KILL: Terminating DNS process
+*Mar  3 17:45:54.243: %SYS-5-RESTART: System restarted --
+Cisco IOS Software, VG20XXM Software (VG20XXM-IPVOICE-M), Version 15.6(3)M3a, RELEASE SOFTWARE (fc2)
+Technical Support: http://www.cisco.com/techsupport
+Copyright (c) 1986-2017 by Cisco Systems, Inc.
+Compiled Tue 19-Sep-17 05:10 by prod_rel_team
+*Mar  3 17:45:55.279: %LINEPROTO-5-UPDOWN: Line protocol on Interface VoipNull0, changed state to up
+*Mar  3 17:45:56.795: %DSPRM-5-UPDOWN: DSP 1 in slot 0, changed state to up
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+*Mar  3 17:46:04.563: %LINK-3-UPDOWN: Interface Foreign Exchange Station 0/0, changed state to up
+*Mar  3 17:46:04.967: %LINK-3-UPDOWN: Interface Foreign Exchange Station 0/1, changed state to up
+*Mar  3 17:46:04.967: %LINK-3-UPDOWN: Interface Foreign Exchange Station 0/2, changed state to up
+*Mar  3 17:46:04.967: %LINK-3-UPDOWN: Interface Foreign Exchange Station 0/3, changed state to up
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>
+Router>en
+Router#
+Router#
+Router#
+Router#
+Router#terminal length 0
+Router#show inventory
+NAME: "VG204XM Chassis", DESCR: "VG204XM Chassis"
+PID: VG204XM           , VID: V01 , SN: FCH2331R02Q
+
+
+Router#show voice port summary
+                                           IN       OUT
+PORT            CH   SIG-TYPE   ADMIN OPER STATUS   STATUS   EC
+=============== == ============ ===== ==== ======== ======== ==
+0/0             --  fxs-ls      up    dorm on-hook  idle     y 
+0/1             --  fxs-ls      up    dorm on-hook  idle     y 
+0/2             --  fxs-ls      up    dorm on-hook  idle     y 
+0/3             --  fxs-ls      up    dorm on-hook  idle     y 
+ 
+PWR FAILOVER PORT        PSTN FAILOVER PORT
+=================        ==================
+
+Router#show voice dsp
+ 
+DSP  DSP                DSPWARE CURR  BOOT                         PAK     TX/RX
+TYPE NUM CH CODEC       VERSION STATE STATE   RST AI VOICEPORT TS ABORT  PACK COUNT
+==== === == ======== ========== ===== ======= === == ========= == ===== ============
+
+ 
+----------------------------FLEX VOICE CARD 0 -----------------------
+               -------
+                           *DSP VOICE CHANNELS*
+
+CURR STATE : (busy)inuse (b-out)busy out (bpend)busyout pending 
+LEGEND     : (bad)bad    (shut)shutdown  (dpend)download pending
+
+DSP    DSP                 DSPWARE CURR  BOOT                         PAK   TX/RX
+TYPE   NUM CH CODEC        VERSION STATE STATE   RST AI VOICEPORT TS ABRT PACK COUNT
+====== === == ========= ========== ===== ======= === == ========= == ==== ============
+                           *DSP SIGNALING CHANNELS*
+DSP    DSP                 DSPWARE CURR  BOOT                         PAK   TX/RX
+TYPE   NUM CH CODEC        VERSION STATE STATE   RST AI VOICEPORT TS ABRT PACK COUNT
+====== === == ========= ========== ===== ======= === == ========= == ==== ============
+C5510  001 01 {flex}        44.2.4 alloc idle      0  0 0/0       02    0         53/0
+C5510  001 02 {flex}        44.2.4 alloc idle      0  0 0/1       02    0         54/0
+C5510  001 03 {flex}        44.2.4 alloc idle      0  0 0/2       06    0         53/0
+C5510  001 04 {flex}        44.2.4 alloc idle      0  0 0/3       06    0         53/0
+------------------------END OF FLEX VOICE CARD 0 ----------------------------
+
+Router#show diag
+Slot 0:
+	VG204XM Mainboard, 2FE, 4FXS (1 on-board DSP) Port adapter
+	Port adapter is analyzed 
+	Port adapter insertion time unknown
+	Voice FPGA Version: 9.14
+
+	EEPROM contents at hardware discovery:
+	Chassis MAC Address      : f8a5.c5d6.8f38
+	PCB Serial Number        : FOC23303MX6
+	Hardware Revision        : 1.0
+	Processor type           : E6 
+	Part Number              : 74-12004-01
+	Board Revision           : C1
+	Deviation Number         : 0
+	Fab Version              : 02
+	RMA Test History         : 00
+	RMA Number               : 0-0-0-0
+	RMA History              : 00
+	MAC Address block size   : 8
+	Chassis Serial Number    : FCH2331R02Q
+	Product (FRU) Number     : VG204XM           
+	Version Identifier       : V01 
+	CLEI Code                : PXMMD00ARA
+	Longitudinal Calibration : 01 10 10 8D 5B 10 10 8D 
+	                           75 10 10 B8 98 10 10 7B 
+	                           45 
+	EEPROM format version 4
+	EEPROM contents (hex):
+	  0x00: 04 FF C3 06 F8 A5 C5 D6 8F 38 C1 8B 46 4F 43 32
+	  0x10: 33 33 30 33 4D 58 36 40 05 ED 41 01 00 09 E6 82
+	  0x20: 4A 2E E4 01 42 43 31 88 00 00 00 00 02 02 03 00
+	  0x30: 81 00 00 00 00 04 00 43 00 08 C2 8B 46 43 48 32
+	  0x40: 33 33 31 52 30 32 51 CB 92 56 47 32 30 34 58 4D
+	  0x50: 20 20 20 20 20 20 20 20 20 20 20 89 56 30 31 20
+	  0x60: D9 03 40 C1 C2 C6 8A 50 58 4D 4D 44 30 30 41 52
+	  0x70: 41 D3 11 01 10 10 8D 5B 10 10 8D 75 10 10 B8 98
+	  0x80: 10 10 7B 45 FF FF FF FF FF FF FF FF FF FF FF FF
+	  0x90: FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+	  0xA0: FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+	  0xB0: FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+	  0xC0: FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+	  0xD0: FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+	  0xE0: FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+	  0xF0: FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+	  0x100: 00
+Router#
+Router#
+Router#
+Router#exit
+00
+	  0x110: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+	  0x120: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+	  0x130: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+	  0x140: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+	  0x150: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+	  0x160: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+	  0x170: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+	  0x180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+	  0x190: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+	  0x1A0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+	  0x1B0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+	  0x1C0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+	  0x1D0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+	  0x1E0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+	  0x1F0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+Router#show ver
+Cisco IOS Software, VG20XXM Software (VG20XXM-IPVOICE-M), Version 15.6(3)M3a, RELEASE SOFTWARE (fc2)
+Technical Support: http://www.cisco.com/techsupport
+Copyright (c) 1986-2017 by Cisco Systems, Inc.
+Compiled Tue 19-Sep-17 05:10 by prod_rel_team
+
+ROM: System Bootstrap, Version 12.4(20r)YA2, RELEASE SOFTWARE (fc1)
+
+Router uptime is 23 minutes
+System returned to ROM by power-on
+System image file is "flash:vg20xxm-ipvoice-mz.156-3.M3a.bin"
+Last reload type: Normal Reload
+Last reload reason: power-on
+
+
+Cisco VG204XM (MPC8300) processor (revision 0x100) with 249856K/12288K bytes of memory.
+Processor board ID FCH2331R02Q
+MPC8300 CPU Rev: Part Number 0x8062, Revision ID 0x11
+2 FastEthernet interfaces
+4 Voice FXS interfaces
+256K bytes of non-volatile configuration memory.
+127232K bytes of ATA CompactFlash (Read/Write)
+
+
+
+Configuration register is 0x2102
+
+Router#
+Router#
+Router#
+Router#
+Router#exit
