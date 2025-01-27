@@ -15,7 +15,7 @@ device = {
 try:
     line_to_use = input("Enter the line you want to use (L0-L15): ").strip()
     # Validate input
-    valid_lines = [f"L{i}" for i in range(15)]
+    valid_lines = [f"L{i}" for i in range(16)]
     if line_to_use not in valid_lines:
         print(f"Invalid line selection. Please choose from: {', '.join(valid_lines)}")
         exit()
