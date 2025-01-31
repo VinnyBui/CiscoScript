@@ -137,7 +137,14 @@ def enterPassword():
       if found:
         found,output = write_and_wait(b'admin@123\r', 'Confirm the password for "admin":', timeout = 10)
         print(output)
-        send_command(b'admin@123\r')
+        found,output = write_and_wait(b'admin@123\r', 'Would you like to enter the basic configuration dialog', timeout = 10)
+        send_command(b'n\r')
+        found = wait_for_prompt('login:', timeout=30)
+        if found:
+          send_command(b'admin\r')
+          time.sleep(1)
+          send_command(b'admin@123\r')
+          print("You have login")
         return
       break
   raise Exception("Failed to enter password")
@@ -209,16 +216,16 @@ def test_log(net_connect):
       "show diagn result swi 1",
       "show post",
       "show version",
-      "show env all",
+      "show env",
       "show inventory",
-      "show license all",
+      "show license",
       "show license usage",
       "show license right-to-use summary",
     ]
     for cmd in commands:
       log_file.write(f"\n{cmd}\n")
       output = net_connect.send_command(
-        cmd, expect_string=r"Switch#|Switch>", read_timeout=60
+        cmd, expect_string=r"switch#|switch>", read_timeout=60
       )
       log_file.write(output + "\n")
       print(output)
@@ -245,11 +252,11 @@ def main():
       print("\nDetected boot process! Sending Ctrl+]...")
       bootSystem()
       eraseConfig()
-    #   # if write_and_wait(b"\r", "Switch#")[0]:
-    #   #   close_pyserial()
-    #   #   net_connect = connect_netmiko()
-    #   #   test_log(net_connect)
-      #   net_connect.disconnect()
+      if write_and_wait(b"\r", "switch#")[0]:
+        close_pyserial()
+        net_connect = connect_netmiko()
+        test_log(net_connect)
+        net_connect.disconnect()
 
   except Exception as e:
     print(f"An error occurred: {e}")

@@ -1,0 +1,171 @@
+
+
+switch# 
+
+switch# 
+
+switch# terminal width 511
+terminal length 0
+
+switch# terminal length 0
+
+switch# 
+
+switch# diagnostic start swi 1 test non-disruptive port allshow diagn result swi 1
+
+          ^
+% Invalid command at '^' marker.
+
+switch# show post
+               ^
+% Invalid command at '^' marker.
+
+switch# show version
+Cisco Nexus Operating System (NX-OS) Software
+TAC support: http://www.cisco.com/tac
+Documents: http://www.cisco.com/en/US/products/ps9372/tsd_products_support_series_home.html
+Copyright (c) 2002-2012, Cisco Systems, Inc. All rights reserved.
+The copyrights to certain works contained herein are owned by
+other third parties and are used and distributed under license.
+
+Some parts of this software are covered under the GNU Public
+License. A copy of the license is available at
+http://www.gnu.org/licenses/gpl.html.
+
+Software
+  BIOS:      version 1.0.19
+  loader:    version N/A
+  kickstart: version 5.2(6a)
+  system:    version 5.2(6a)
+  BIOS compile time:       02/01/10
+  kickstart image file is: bootflash:/m9100-s2ek9-kickstart-mz.5.2.6a.bin
+
+  kickstart compile time:  12/25/2020 12:00:00 [09/04/2012 23:17:04]
+  system image file is:    bootflash:/m9100-s2ek9-mz.5.2.6a.bin
+  system compile time:     8/13/2012 11:00:00 [09/05/2012 00:19:28]
+
+
+Hardware
+  cisco MDS 9124 (1 Slot) Chassis ("1/2/4 Gbps FC/Supervisor-2")
+  Motorola, e500  with 516128 kB of memory.
+  Processor Board ID JAF1523AQTM
+
+  Device name: switch
+  bootflash:     254464 kB
+Kernel uptime is 0 day(s), 0 hour(s), 1 minute(s), 52 second(s)
+
+Last reset 
+  Reason: Unknown
+  System version: 
+  Service: 
+
+switch# show env
+
+Clock:
+----------------------------------------------------------
+Clock           Model                Hw         Status
+----------------------------------------------------------
+A               Clock Module         --         NotSupported/None
+
+
+Fan:
+------------------------------------------------------
+Fan             Model                Hw         Status
+------------------------------------------------------
+ChassisFan1     FAN Module 1         --         Ok  
+
+ChassisFan2     FAN Module 2         --         Ok  
+ChassisFan3     FAN Module 3         --         Ok  
+Fan_in_PS1      --                   --         Ok             
+Fan_in_PS2      --                   --         Failure        
+Fan Air Filter : NotSupported
+
+
+Temperature:
+--------------------------------------------------------------------
+Module   Sensor        MajorThresh   MinorThres   CurTemp     Status
+                       (Celsius)     (Celsius)    (Celsius)         
+--------------------------------------------------------------------
+
+
+Power Supply:
+Voltage: 42 Volts
+-----------------------------------------------------
+PS  Model                Power       Power     Status
+                         (Watts)     (Amp)           
+-----------------------------------------------------
+1   DS-C24-300AC          299.88      7.14     Ok                  
+2   ------------            0.00      0.00     Fail/Shut           
+
+
+Mod Model                Power     Power       Power     Power       Status
+                         Requested Requested   Allocated Allocated         
+                         (Watts)   (Amp)       (Watts)   (Amp)               
+--- -------------------  -------   ----------  --------- ----------  ----------
+1    DS-C9124-K9-SUP      209.16    4.98       209.16    4.98        Powered-Up
+
+
+Power Usage Summary:
+--------------------
+Power Supply redundancy mode:                 Redundant 
+Power Supply redundancy operational mode:     Redundant
+
+Total Power Capacity                              299.88 W
+
+
+Power reserved for Supervisor(s)                  209.16 W
+Power reserved for Fan Module(s)                   42.00 W
+                                                -------------
+Total Power Available                              48.72 W
+                                                -------------
+
+switch# show inventory
+
+NAME: "Chassis",  DESCR: "MDS 9124 (1 Slot) Chassis "            
+PID: DS-C9124-K9         ,  VID: V05 ,  SN: FOX1511H887          
+
+NAME: "Slot 1",  DESCR: "1/2/4 Gbps FC/Supervisor-2"            
+PID: DS-C9124-K9-SUP     ,  VID: V05 ,  SN: JAF1523AQTM          
+
+NAME: "Slot 2",  DESCR: "MDS 9124 (1 Slot) Chassis Power Supply"
+PID: DS-C24-300AC        ,  VID: V00
+,  SN: QCS1446E1JX          
+
+NAME: "Slot 3",  DESCR: "MDS 9124 (1 Slot) Chassis Power Supply"
+PID: DS-C24-300AC        ,  VID: V00
+,  SN: QCS1452E1EA          
+
+NAME: "Slot 4",  DESCR: "MDS 9124 (1 Slot) Chassis Fan Module"  
+PID:                     ,  VID: V00
+,  SN:                      
+
+NAME: "Slot 5",  DESCR: "MDS 9124 (1 Slot) Chassis Fan Module"  
+PID:                     ,  VID: V00
+,  SN:                      
+
+NAME: "Slot 6",  DESCR: "MDS 9124 (1 Slot) Chassis Fan Module"  
+PID:                     ,  VID: V00
+,  SN:                      
+
+
+switch# show license
+
+switch# show license usage
+Feature                      Ins  Lic   Status Expiry Date Comments
+                                 Count
+--------------------------------------------------------------------------------
+
+FM_SERVER_PKG                 No    -   Unused             Grace 59D 19H
+ENTERPRISE_PKG                No    -   Unused             -
+PORT_ACTIVATION_PKG           No    8   In use never       -
+10G_PORT_ACTIVATION_PKG       No    0   Unused             -
+--------------------------------------------------------------------------------
+
+switch# show license right-to-use summary
+
+                     ^
+% Invalid command at '^' marker.
+
+switch# 
+
+switch# exit
