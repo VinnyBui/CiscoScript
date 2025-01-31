@@ -67,6 +67,11 @@ def rommon_mode(connection):
         raise Exception(f"Failed to delete")
 #NEED TO CLEAN THIS UP
 def boot_ios(connection):
+    output = connection.send_command_timing("delete /force flash:*.*")
+    print(output)
+    output = connection.send_command_timing("mkdir flash:c2960x-universalk9-mz.152-4.E")
+    connection.send_command_timing("\n")
+    print(output)
     output = connection.send_command_timing("conf t")
     print(output)
     output = connection.send_command_timing("boot system flash:/c2960x-universalk9-mz.152-4.E.bin", delay_factor=2)
@@ -81,7 +86,7 @@ def boot_ios(connection):
         output = connection.send_command_timing("end")
         print(output)
         # Start TFTP transfer
-        output = connection.send_command_timing("copy tftp://192.168.1.107/c2960x-universalk9-mz.152-4.E.bin flash:/c2960x-universalk9-mz.152-4.E.bin",  delay_factor=5)
+        output = connection.send_command_timing("copy tftp://192.168.1.107/c2960x-universalk9-mz.152-4.E.bin flash:c2960x-universalk9-mz.152-4.E.bin",  delay_factor=5)
         print("Initial Copy Command Output:", output)
         start_time = time.time()
         while time.time() - start_time < 20:
@@ -134,7 +139,7 @@ def run_diagnostic(connection):
         rommon_reset(connection, output)
 def run(connection, line_to_use):
     try:
-        rommon_mode(connection)
+        # rommon_mode(connection)
         boot_ios(connection)
         run_diagnostic(connection)
         output = connection.send_command("terminal length 0", expect_string="Switch#")
