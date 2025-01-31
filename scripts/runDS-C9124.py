@@ -81,47 +81,66 @@ def write_and_wait(command, expected_prompt, timeout=120):
     send_command(command)
     return wait_for_prompt(expected_prompt, timeout)
 
-# def log_to_file(data):
-#     with open("rommon_reset_log.txt", "a") as log_file:
-#         log_file.write(data + "\n")
+def eraseConfig():
+  try:
+    # Verify we are in 'switch(boot)#' mode before proceeding
+    found = write_and_wait(b'\r', "switch(boot)#")[0]
+    if not found:
+      raise Exception("Error: Not in 'switch(boot)#' mode. Cannot proceed with eraseConfig().")
+    print("In 'switch(boot)#' mode. Proceeding with erase...")
+    found, output = write_and_wait(b'write erase\r', 'erase the startup-configuration')
+    if not found:
+      raise Exception("Error: cant write erase")
+    print(output)
+    send_command(b'y\r')
 
-def rommon_reset():
-  found, output = wait_for_prompt('Press RETURN to get started', timeout=350)
-  time.sleep(5)
-  ser.reset_input_buffer()  
-  ser.reset_output_buffer()
-  if not found:
-    raise Exception("Failed to find Press RETURN prompt")
-  print("\r##Detected 'Press RETURN to get started'. Sending Enter key.")
-  send_command(b"\r") 
+    #enter config mode
+    send_command(b'conf t\r')
+    send_command(b'admin-password admin@123\r')
+    send_command(b'exit\r')
 
-  print("Waiting for 'Switch>' prompt...")
-  found, output = wait_for_prompt("Switch>", timeout=60)
-  if not found:
-    raise Exception("Failed to find 'Switch>' prompt")
+    #reload machine
+    send_command(b'reload\r')
+    found, output = wait_for_prompt("This command will reboot this supervisor module")
+    if found:
+      found, output = write_and_wait(b'\r', 'This command will reboot')
+      send_command(b'y\n')
+      enterPassword()
 
-  print("Found 'Switch>' prompt. Entering 'enable' mode.")
-  send_command(b"en\r")
-  time.sleep(2) 
-  found, output = wait_for_prompt("Switch#")
-  if not found:
-    raise Exception("Failed to enter 'enable' mode (Switch#)")
-  print("Successfully entered 'enable' mode.")
+  except Exception as e:
+      print(f"An error occurred during config erase: {e}")
 
 def bootSystem():
-    print("Sending Ctrl+] repeatedly until 'switch(boot)#' appears...")
-    max_attempts = 30 
-    attempts = 0
-    while attempts < max_attempts:
-      send_command(b'\x1d')
-      found, output = wait_for_prompt("switch(boot)#")
+  print("Sending Ctrl+] repeatedly until 'switch(boot)#' appears...")
+  max_attempts = 20
+  attempts = 0
+
+  while attempts < max_attempts:
+    send_command(b'\x1d', delay=1.2)  # Send Ctrl+]
+    found, output = wait_for_prompt("switch(boot)#", timeout=30)
+    if found:
+      print("Entered switch boot mode.")
+      print(output)
+      return
+    attempts += 1
+
+  # If we exhaust all attempts without finding "switch(boot)#", raise an exception
+  raise Exception("Failed to enter 'switch(boot)#' mode after multiple attempts.")
+
+def enterPassword():
+  while(True):
+    send_command(b'\r')
+    found = wait_for_prompt('Do you want to enforce secure password standard', timeout=240)[0]
+    if found:
+      send_command(b'n\r')
+      found = wait_for_prompt('Enter the password for "admin":')[0]
       if found:
-          print("Entered switch boot mode.")
-          return
-      attempts += 1
-
-    print("Failed to enter boot mode after multiple attempts.")
-
+        found,output = write_and_wait(b'admin@123\r', 'Confirm the password for "admin":', timeout = 10)
+        print(output)
+        send_command(b'admin@123\r')
+        return
+      break
+  raise Exception("Failed to enter password")
 
 def close_pyserial():
     """Ensure the PySerial connection is fully closed."""
@@ -152,20 +171,6 @@ def connect_netmiko():
     net_connect = ConnectHandler(**device)
     print("Netmiko connection established.")
     return net_connect
-
-def start_config(net_connect):
-  output = net_connect.send_command(
-    "copy run start",
-    expect_string=r"Destination filename \[startup-config\]\?",
-    read_timeout=60
-  )
-  print(output)
-  output = net_connect.send_command("\r", expect_string="Switch#")
-  print(output)
-  output = net_connect.send_command("write erase", expect_string=r"\[confirm\]", read_timeout=60)
-  print(output)
-  output = net_connect.send_command("\r", expect_string="Switch#")
-  print("Configuration erased")
 
 def parse_version_data(log_contents):
   try:
@@ -200,12 +205,15 @@ def test_log(net_connect):
     
   with open(log_path, "w") as log_file:
     commands = [
-      "diagnostic start switch 1 test non-disruptive",
+      "diagnostic start swi 1 test non-disruptive port all"
       "show diagn result swi 1",
       "show post",
       "show version",
       "show env all",
       "show inventory",
+      "show license all",
+      "show license usage",
+      "show license right-to-use summary",
     ]
     for cmd in commands:
       log_file.write(f"\n{cmd}\n")
@@ -236,11 +244,11 @@ def main():
     if write_and_wait(b'\r', "Loading system software")[0]:
       print("\nDetected boot process! Sending Ctrl+]...")
       bootSystem()
-      # if write_and_wait(b"\r", "Switch#")[0]:
-      #   close_pyserial()
-      #   net_connect = connect_netmiko()
-      #   start_config(net_connect)
-      #   test_log(net_connect)
+      eraseConfig()
+    #   # if write_and_wait(b"\r", "Switch#")[0]:
+    #   #   close_pyserial()
+    #   #   net_connect = connect_netmiko()
+    #   #   test_log(net_connect)
       #   net_connect.disconnect()
 
   except Exception as e:
