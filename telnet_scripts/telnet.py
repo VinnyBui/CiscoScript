@@ -9,13 +9,13 @@ logging.basicConfig(level=logging.INFO)
 # Device connection details
 device = {
     "device_type": "cisco_ios_telnet",
-    "ip": "192.168.1.250",
+    "ip": "192.168.1.251",
     "timeout": 60,
 }
 try:
-    line_to_use = input("Enter the line you want to use (L0-L15): ").strip()
+    line_to_use = input("Enter the line you want to use (L1-L32): ").strip()
     # Validate input
-    valid_lines = [f"L{i}" for i in range(16)]
+    valid_lines = [f"L{i}" for i in range(33)]
     if line_to_use not in valid_lines:
         print(f"Invalid line selection. Please choose from: {', '.join(valid_lines)}")
         exit()
