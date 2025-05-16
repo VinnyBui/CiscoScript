@@ -10,9 +10,6 @@ class SerialNumberFinder:
         r"\\USER1-PC\ProNetworks\Test Sheet",
         r"C:\Users\vinhb\Projects\CiscoScript\sample\ssss"
     ]
-    self.window = None
-    self.input_box = None
-    self.status_label = None
     self.setUpGUI()
 
   def openFile(self, event=None):
